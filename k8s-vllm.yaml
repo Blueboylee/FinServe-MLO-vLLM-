@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: finserve
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-server
+  namespace: finserve
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vllm-server
+  template:
+    metadata:
+      labels:
+        app: vllm-server
+    spec:
+      containers:
+        - name: vllm
+          image: your-registry/finserve-vllm:latest
+          imagePullPolicy: IfNotPresent
+          command: ["python", "-m", "server.run_grpc_server"]
+          env:
+            - name: VLLM_BASE_MODEL
+              value: "Qwen/Qwen2.5-32B-Instruct"
+            - name: GRPC_HOST
+              value: "0.0.0.0"
+            - name: GRPC_PORT
+              value: "50051"
+          ports:
+            - containerPort: 50051
+              name: grpc
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm-grpc
+  namespace: finserve
+spec:
+  selector:
+    app: vllm-server
+  ports:
+    - name: grpc
+      port: 50051
+      targetPort: 50051
+  type: ClusterIP
+
