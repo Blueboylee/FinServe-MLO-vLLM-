@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package finserve.internal;
+
+// StreamChat: 内网流式聊天，根据 expert_id 选择 LoRA 专家
+message StreamChatRequest {
+  string prompt = 1;
+  string expert_id = 2;   // 如 "expert-a", "expert-b", 空或 "base" 表示基座
+  int32 max_tokens = 3;
+  float temperature = 4;
+}
+
+message StreamChatChunk {
+  string text_delta = 1;
+  bool finished = 2;
+}
+
+service InternalChat {
+  // 服务端流式：一次请求，多次返回 Chunk
+  rpc StreamChat(StreamChatRequest) returns (stream StreamChatChunk);
+}
