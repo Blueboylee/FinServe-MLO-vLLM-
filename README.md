@@ -94,19 +94,6 @@ python scripts/run_serve.py --port 8001 --max-lora-rank 64
 - 专家 A：`model="expert-a"`
 - 专家 B：`model="expert-b"`
 
-### 使用自带示例脚本
-
-```bash
-# 使用专家 A（默认）
-python scripts/inference_example.py "你的问题"
-
-# 指定专家 B
-python scripts/inference_example.py "你的问题" --model expert-b
-
-# 使用基座
-python scripts/inference_example.py "你的问题" --model Qwen/Qwen2.5-32B-Instruct
-```
-
 ### 使用 curl
 
 ```bash
@@ -165,7 +152,6 @@ FinServe-MLO-vLLM-/
 └── scripts/
     ├── download_experts.py   # 下载专家 LoRA 并生成 lora_paths.json
     ├── run_serve.py          # 启动 vLLM 服务（基座 + 双 LoRA）
-    ├── inference_example.py  # HTTP 推理示例（需先启动服务）
     └── async_inference.py    # AsyncLLMEngine 异步推理（按 expert_id 选 LoRA）
 ```
 
