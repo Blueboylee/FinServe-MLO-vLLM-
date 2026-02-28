@@ -388,6 +388,6 @@ curl -X POST http://localhost:8000/v1/chat/finance \
 
 ## 说明
 
-- **基座**：默认使用 HuggingFace 上的 `Qwen/Qwen2.5-32B-Instruct`，与 QLoRA 微调时的基座一致即可。
+- **基座**：需要使用modalscope上的 `Qwen/Qwen2.5-32B-Instruct`，与 QLoRA 微调时的基座一致即可。
 - **LoRA rank**：若训练时使用了不同 rank，请将 `run_serve.py` 中的 `--max-lora-rank` 设为所有专家中的最大 rank。
 - **显存不足**：可考虑使用 vLLM 的量化参数（如 `--quantization awq`）或增大 `--tensor-parallel-size`。

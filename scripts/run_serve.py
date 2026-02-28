@@ -14,7 +14,6 @@ from pathlib import Path
 # 项目根目录
 ROOT = Path(__file__).resolve().parent.parent
 
-# 默认基座（HuggingFace，vLLM 可直接拉取）
 DEFAULT_BASE_MODEL = "Qwen/Qwen2.5-32B-Instruct"
 
 # LoRA 配置文件名
