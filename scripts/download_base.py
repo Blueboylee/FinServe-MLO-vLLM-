@@ -18,25 +18,18 @@ def download_base(
     cache_dir: str | Path | None = None,
     gptq: bool = False,
 ) -> str:
-    """下载基座模型：GPTQ 从 HuggingFace，AWQ 从 ModelScope。返回本地路径。"""
+    """从 ModelScope（国内源）下载基座模型，AWQ 与 GPTQ 均走魔搭。返回本地路径。"""
+    try:
+        from modelscope import snapshot_download
+    except ImportError:
+        raise ImportError("请先安装: pip install modelscope") from None
+
     model_id = MODEL_ID_GPTQ if gptq else MODEL_ID_AWQ
     kind = "4bit GPTQ" if gptq else "4bit AWQ"
-    print(f"正在下载基座模型: {model_id}")
+    print(f"正在从 ModelScope（魔搭）下载基座模型: {model_id}")
     print(f"  （约 18GB {kind}，请确保磁盘空间充足）")
 
-    if gptq:
-        try:
-            from huggingface_hub import snapshot_download
-        except ImportError:
-            raise ImportError("下载 GPTQ 需安装: pip install huggingface_hub") from None
-        default_cache = Path.home() / ".cache" / "huggingface" / "hub"
-    else:
-        try:
-            from modelscope import snapshot_download
-        except ImportError:
-            raise ImportError("下载 AWQ 需安装: pip install modelscope") from None
-        default_cache = Path.home() / ".cache" / "modelscope" / "hub"
-
+    default_cache = Path.home() / ".cache" / "modelscope" / "hub"
     _cache = Path(cache_dir) if cache_dir else default_cache
     _cache = _cache.resolve()
     _cache.mkdir(parents=True, exist_ok=True)
