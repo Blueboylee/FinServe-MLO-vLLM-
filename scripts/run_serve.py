@@ -32,8 +32,9 @@ def load_lora_paths(config_path: Path | None = None) -> dict[str, str]:
 
 
 def build_lora_modules(paths: dict[str, str]) -> str:
-    """构建 --lora-modules 参数字符串：name1=path1,name2=path2"""
-    return ",".join(f"{k}={v}" for k, v in paths.items())
+    """构建 --lora-modules 参数：vLLM 要求 JSON 格式，如 [{"name":"expert-a","path":"/path"}, ...]"""
+    modules = [{"name": k, "path": v} for k, v in paths.items()]
+    return json.dumps(modules)
 
 
 def main() -> None:
