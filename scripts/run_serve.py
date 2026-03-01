@@ -131,11 +131,9 @@ def main() -> None:
     base_model_str = str(base_path)
 
     lora_paths = load_lora_paths(Path(args.lora_config))
-    # 使用 python -m vllm.entrypoints.cli serve（部分环境里 vllm 脚本错误地调用 python -m vllm 会报 No module named vllm.__main__）
-    cmd = [
-        sys.executable,
-        "-m",
-        "vllm.entrypoints.cli",
+    # 构建 vllm serve 的参数列表
+    vllm_argv = [
+        "vllm",
         "serve",
         base_model_str,
         "--quantization", "gptq",
@@ -151,18 +149,36 @@ def main() -> None:
                 continue
             lora_pairs.append(f"{name}={path_resolved}")
         if lora_pairs:
-            cmd += ["--enable-lora", "--max-loras", str(args.max_loras), "--max-lora-rank", str(args.max_lora_rank)]
-            cmd += ["--lora-modules"] + lora_pairs
+            vllm_argv += ["--enable-lora", "--max-loras", str(args.max_loras), "--max-lora-rank", str(args.max_lora_rank)]
+            vllm_argv += ["--lora-modules"] + lora_pairs
             print("LoRA 已启用:", [p.split("=")[0] for p in lora_pairs])
         else:
             print("lora_paths.json 中路径均无效，仅启动基座")
     else:
         print("未找到 lora_paths.json，仅启动基座（无 LoRA）")
+    vllm_argv += args.extra
 
-    cmd += args.extra
-    print("执行:", " ".join(cmd))
+    print("执行: vllm", " ".join(vllm_argv[2:]))  # 跳过 "vllm" "serve"
     os.chdir(ROOT)
-    sys.exit(subprocess.run(cmd).returncode)
+
+    # 在进程内调用 vLLM CLI main，避免 python -m vllm / python -m vllm.entrypoints.cli 在某些环境下不可用
+    backup_argv = sys.argv
+    try:
+        sys.argv = vllm_argv
+        from vllm.entrypoints.cli import main as vllm_main
+        sys.exit(vllm_main() or 0)
+    except ImportError as e:
+        sys.argv = backup_argv
+        # 回退：用子进程执行 vllm 可执行文件（若存在）
+        bindir = Path(sys.executable).parent
+        vllm_bin = bindir / "vllm"
+        if vllm_bin.is_file() or (bindir / "vllm.exe").is_file():
+            cmd = [str(vllm_bin.resolve()) if vllm_bin.is_file() else str((bindir / "vllm.exe").resolve())] + vllm_argv[1:]
+            sys.exit(subprocess.run(cmd).returncode)
+        print(f"错误: 无法导入 vllm.entrypoints.cli.main（{e}），且未找到 vllm 可执行文件", file=sys.stderr)
+        sys.exit(1)
+    finally:
+        sys.argv = backup_argv
 
 
 if __name__ == "__main__":
