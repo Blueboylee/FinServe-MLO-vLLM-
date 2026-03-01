@@ -227,8 +227,11 @@ def main() -> None:
 
     # 使用本地 GPTQ 目录时，先确保 config 为 Qwen2 + gptq，避免 ModelScope 错包导致 "Qwen3-0.6B" / "Cannot find the config file for gptq"
     if args.quantization == "gptq" and not args.no_quantization:
-        base_path = Path(base_model)
-        if base_path.is_dir():
+        base_path = Path(base_model).resolve()
+        if not base_path.is_dir():
+            print("提示：若出现 'Cannot find the config file for gptq'，请先运行：")
+            print(f"  python scripts/fix_gptq_config.py {base_model}")
+        else:
             _ensure_gptq_config(base_path)
 
     os.chdir(ROOT)
