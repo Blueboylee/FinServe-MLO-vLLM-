@@ -90,7 +90,7 @@ def main():
     if not expert_dir.exists():
         raise FileNotFoundError(f"专家目录不存在: {expert_dir}，请先运行 download_models.py")
 
-    # 初始化 vLLM：GPTQ + LoRA
+    # 初始化 vLLM：GPTQ + LoRA（V100 用 XFORMERS，不支持 FA2）
     llm = LLM(
         model=str(base_dir),
         quantization="gptq",
@@ -98,7 +98,8 @@ def main():
         max_lora_rank=64,
         max_loras=2,
         tensor_parallel_size=args.tensor_parallel_size,
-        gpu_memory_utilization=0.9,  # V100 显存利用
+        gpu_memory_utilization=0.9,
+        attention_backend="XFORMERS",
     )
 
     # LoRA 请求

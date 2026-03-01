@@ -1,8 +1,11 @@
 #!/bin/bash
 # vLLM 服务：共享 Qwen2.5 32B GPTQ 基座 + 两个 QLoRA 专家
-# 适配 V100 GPU
+# 适配 V100 GPU（V100 不支持 FA2，使用 XFORMERS）
 
 set -e
+
+# V100 compute capability 7.0，FA2 需 >= 8，强制用 XFORMERS
+export VLLM_ATTENTION_BACKEND=XFORMERS 2>/dev/null || true
 
 BASE_DIR="${BASE_DIR:-./models/base}"
 EXPERTS_DIR="${EXPERTS_DIR:-./models/experts}"
@@ -38,6 +41,7 @@ vllm serve "$BASE_DIR" \
   --max-loras 2 \
   --max-lora-rank 64 \
   --lora-modules "expert-a=$EXPERT_A" "expert-b=$EXPERT_B" \
+  --attention-backend XFORMERS \
   --host "$HOST" \
   --port "$PORT" \
   --gpu-memory-utilization 0.9 \

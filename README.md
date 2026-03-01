@@ -102,3 +102,4 @@ curl http://localhost:8000/v1/completions \
 1. **显存不足**：在 `run_inference.py` 或 `serve_experts.sh` 中调低 `gpu_memory_utilization`（如 0.8）。
 2. **基座模型在 ModelScope 上不存在**：若 `Qwen/Qwen2.5-32B-Instruct-GPTQ-Int4` 不可用，可在 `download_models.py` 中修改 `BASE_MODEL_ID` 为 ModelScope 上可用的 GPTQ 版本。
 3. **LoRA 加载失败**：确认专家模型为 QLoRA 格式，且与基座架构一致。
+4. **`FA version 2 is not supported`**：V100 不支持 Flash Attention 2。已默认使用 `--attention-backend XFORMERS`，需安装 `pip install xformers`。

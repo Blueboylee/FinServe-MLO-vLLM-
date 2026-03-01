@@ -13,6 +13,9 @@ if sys.version_info < (3, 10):
 import os
 from pathlib import Path
 
+# V100 不支持 FA2，强制用 XFORMERS
+os.environ.setdefault("VLLM_ATTENTION_BACKEND", "XFORMERS")
+
 # 路径
 BASE_DIR = Path(os.environ.get("BASE_DIR", "./models/base")).resolve()
 EXPERTS_DIR = Path(os.environ.get("EXPERTS_DIR", "./models/experts")).resolve()
@@ -39,6 +42,7 @@ cmd = [
     "--max-loras", "2",
     "--max-lora-rank", "64",
     "--lora-modules", f"expert-a={EXPERT_A}", f"expert-b={EXPERT_B}",
+    "--attention-backend", "XFORMERS",  # V100 不支持 FA2，用 XFORMERS
     "--host", HOST,
     "--port", str(PORT),
     "--gpu-memory-utilization", "0.9",
