@@ -28,7 +28,7 @@ from server.scheduler import ExpertClusterQueue, run_worker
 # 默认配置（可通过环境变量覆盖）
 DEFAULT_HOST = os.environ.get("GRPC_HOST", "0.0.0.0")
 DEFAULT_PORT = int(os.environ.get("GRPC_PORT", "50051"))
-DEFAULT_MODEL = os.environ.get("VLLM_BASE_MODEL", "Qwen/Qwen2.5-32B-Instruct")
+DEFAULT_MODEL = os.environ.get("VLLM_BASE_MODEL", "Qwen/Qwen2.5-32B-Instruct-AWQ")
 DEFAULT_MAX_LORA_RANK = 64
 DEFAULT_MAX_LORAS = 2
 DEFAULT_MAX_CONCURRENT = 8

@@ -69,15 +69,15 @@ python scripts/run_serve.py
 
 默认行为：
 
-- **基座模型**：`Qwen/Qwen2.5-32B-Instruct`（HuggingFace，首次会自动下载）
+- **基座模型**：`Qwen/Qwen2.5-32B-Instruct-AWQ`（4bit AWQ，约 18GB，首次会自动下载）
 - **LoRA**：从 `lora_paths.json` 读取 `expert-a`、`expert-b` 路径并挂载
 - **服务地址**：`http://0.0.0.0:8000`
 
 常用参数：
 
 ```bash
-# 指定基座（本地或 HF 模型 ID）
-python scripts/run_serve.py --base-model /path/to/Qwen2.5-32B-Instruct
+# 指定基座（本地或 HF 模型 ID，仅 4bit AWQ）
+python scripts/run_serve.py --base-model /path/to/Qwen2.5-32B-Instruct-AWQ
 
 # 多卡张量并行
 python scripts/run_serve.py --tensor-parallel-size 2
@@ -90,7 +90,7 @@ python scripts/run_serve.py --port 8001 --max-lora-rank 64
 
 服务启动后，可通过请求中的 `model` 选择**基座**或**专家**：
 
-- 基座：`model="Qwen/Qwen2.5-32B-Instruct"`
+- 基座：`model="Qwen/Qwen2.5-32B-Instruct-AWQ"`（或本地路径）
 - 专家 A：`model="expert-a"`
 - 专家 B：`model="expert-b"`
 
@@ -207,7 +207,7 @@ from scripts.async_inference import create_engine, generate_with_expert, generat
 from vllm import SamplingParams
 
 async def run():
-    engine = create_engine(model="Qwen/Qwen2.5-32B-Instruct")
+    engine = create_engine(model="Qwen/Qwen2.5-32B-Instruct-AWQ")
     sp = SamplingParams(max_tokens=128, temperature=0.7)
     # 异步生成器，按 expert_id 调用对应 LoRA
     async for out in generate_with_expert(engine, "你好", sp, expert_id="expert-a"):
@@ -256,7 +256,7 @@ asyncio.run(run())
 | `--host` | `0.0.0.0` | 监听 host |
 | `--port` | `50051` | 监听 port |
 | `--bind` | - | 直接指定地址（覆盖 host/port），如 `0.0.0.0:50051` |
-| `--model` | `Qwen/Qwen2.5-32B-Instruct` | 基座模型 ID 或本地路径 |
+| `--model` | `Qwen/Qwen2.5-32B-Instruct-AWQ` | 基座模型 ID 或本地路径（仅 4bit AWQ） |
 | `--lora-config` | 项目根 `lora_paths.json` | LoRA 路径配置 |
 | `--max-lora-rank` | `64` | LoRA 最大 rank |
 | `--max-loras` | `2` | 最大同时 LoRA 数 |
@@ -312,7 +312,7 @@ python -m server.run_grpc_server
 指定端口、模型路径、调度与限流：
 
 ```bash
-python -m server.run_grpc_server --port 50052 --model /path/to/Qwen2.5-32B-Instruct
+python -m server.run_grpc_server --port 50052 --model /path/to/Qwen2.5-32B-Instruct-AWQ
 python -m server.run_grpc_server --host 0.0.0.0 --port 50051 --lora-config ./lora_paths.json --max-lora-rank 64
 # 调度层：全局并发 16，每 expert 最多 4 并发，2 个 worker
 python -m server.run_grpc_server --max-concurrent 16 --per-expert-limit 4 --workers 2
@@ -388,6 +388,6 @@ curl -X POST http://localhost:8000/v1/chat/finance \
 
 ## 说明
 
-- **基座**：需要使用modalscope上的 `Qwen/Qwen2.5-32B-Instruct`，与 QLoRA 微调时的基座一致即可。
+- **基座**：使用 ModelScope 上的 `Qwen/Qwen2.5-32B-Instruct-AWQ`（4bit AWQ，约 18GB），与 QLoRA 微调时的基座一致即可。
 - **LoRA rank**：若训练时使用了不同 rank，请将 `run_serve.py` 中的 `--max-lora-rank` 设为所有专家中的最大 rank。
-- **显存不足**：可考虑使用 vLLM 的量化参数（如 `--quantization awq`）或增大 `--tensor-parallel-size`。
+- **显存不足**：可增大 `--tensor-parallel-size` 多卡推理。

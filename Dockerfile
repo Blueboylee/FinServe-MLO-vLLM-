@@ -16,7 +16,7 @@ COPY . /app
 
 RUN pip install -r requirements.txt
 
-ENV VLLM_BASE_MODEL=Qwen/Qwen2.5-32B-Instruct \
+ENV VLLM_BASE_MODEL=Qwen/Qwen2.5-32B-Instruct-AWQ \
     GRPC_HOST=0.0.0.0 \
     GRPC_PORT=50051 \
     GATEWAY_HOST=0.0.0.0 \

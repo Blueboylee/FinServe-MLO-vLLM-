@@ -28,8 +28,8 @@ except ImportError:
 from vllm.lora.request import LoRARequest
 from vllm.outputs import RequestOutput
 
-# 默认与 run_serve 一致
-DEFAULT_BASE_MODEL = "Qwen/Qwen2.5-32B-Instruct"
+# 默认与 run_serve 一致：仅 4bit AWQ 约 18GB
+DEFAULT_BASE_MODEL = "Qwen/Qwen2.5-32B-Instruct-AWQ"
 DEFAULT_MAX_LORA_RANK = 64
 DEFAULT_MAX_LORAS = 2
 
@@ -41,7 +41,9 @@ def create_engine(
     max_cpu_loras: int | None = 2,
     **engine_kwargs,
 ) -> AsyncLLMEngine:
-    """创建已启用 LoRA 的 AsyncLLMEngine。"""
+    """创建已启用 LoRA 的 AsyncLLMEngine（仅 4bit AWQ）。"""
+    if "quantization" not in engine_kwargs:
+        engine_kwargs["quantization"] = "awq"
     engine_args = EngineArgs(
         model=model,
         enable_lora=True,

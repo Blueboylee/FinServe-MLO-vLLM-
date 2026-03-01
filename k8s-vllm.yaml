@@ -25,7 +25,7 @@ spec:
           command: ["python", "-m", "server.run_grpc_server"]
           env:
             - name: VLLM_BASE_MODEL
-              value: "Qwen/Qwen2.5-32B-Instruct"
+              value: "Qwen/Qwen2.5-32B-Instruct-AWQ"
             - name: GRPC_HOST
               value: "0.0.0.0"
             - name: GRPC_PORT

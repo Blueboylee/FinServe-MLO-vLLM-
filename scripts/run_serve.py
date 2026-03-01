@@ -14,7 +14,7 @@ from pathlib import Path
 # 项目根目录
 ROOT = Path(__file__).resolve().parent.parent
 
-DEFAULT_BASE_MODEL = "Qwen/Qwen2.5-32B-Instruct"
+DEFAULT_BASE_MODEL = "Qwen/Qwen2.5-32B-Instruct-AWQ"  # 4bit AWQ 量化，约 18GB
 
 # LoRA 配置文件名
 LORA_CONFIG = "lora_paths.json"
@@ -43,7 +43,7 @@ def main() -> None:
         "--base-model",
         type=str,
         default=os.environ.get("VLLM_BASE_MODEL", DEFAULT_BASE_MODEL),
-        help="基座模型 ID 或本地路径",
+        help="基座模型 ID 或本地路径（仅支持 4bit AWQ）",
     )
     parser.add_argument(
         "--lora-config",
@@ -70,12 +70,16 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    # 仅支持 4bit AWQ，禁止全精度模型 ID
+    if args.base_model.strip() == "Qwen/Qwen2.5-32B-Instruct":
+        print("错误：不支持全精度基座，请使用 4bit AWQ 模型：Qwen/Qwen2.5-32B-Instruct-AWQ")
+        sys.exit(1)
+
     paths = load_lora_paths(Path(args.lora_config))
     lora_modules = build_lora_modules(paths)
 
-    cmd = [
-        "vllm", "serve",
-        args.base_model,
+    cmd = ["vllm", "serve", args.base_model, "--quantization", "awq"]
+    cmd += [
         "--enable-lora",
         "--lora-modules", lora_modules,
         "--max-loras", str(args.max_loras),
