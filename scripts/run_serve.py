@@ -14,7 +14,9 @@ from pathlib import Path
 # 项目根目录
 ROOT = Path(__file__).resolve().parent.parent
 
-DEFAULT_BASE_MODEL = "Qwen/Qwen2.5-32B-Instruct-AWQ"  # 4bit AWQ 量化，约 18GB
+# 4bit 量化基座：GPTQ 兼容 V100 等算力 70；AWQ 需算力 75+
+DEFAULT_BASE_MODEL_AWQ = "Qwen/Qwen2.5-32B-Instruct-AWQ"
+DEFAULT_BASE_MODEL_GPTQ = "Qwen/Qwen2.5-32B-Instruct-GPTQ-Int4"
 
 # LoRA 配置文件名
 LORA_CONFIG = "lora_paths.json"
@@ -31,9 +33,10 @@ def load_lora_paths(config_path: Path | None = None) -> dict[str, str]:
         return json.load(f)
 
 
-def build_lora_modules_args(paths: dict[str, str]) -> list[str]:
-    """每个 LoRA 单独传一个 --lora-modules '{"name":"id","path":"/path"}'，多个 LoRA 则多次传参。"""
-    return [json.dumps({"name": name, "path": path}) for name, path in paths.items()]
+def build_lora_modules_json(paths: dict[str, str]) -> str:
+    """vLLM 0.16 支持单次传入 JSON 数组： [{"name":"id","path":"/path"}, ...]，避免 duplicate key。"""
+    modules = [{"name": name, "path": path} for name, path in paths.items()]
+    return json.dumps(modules)
 
 
 def main() -> None:
@@ -42,8 +45,15 @@ def main() -> None:
     parser.add_argument(
         "--base-model",
         type=str,
-        default=os.environ.get("VLLM_BASE_MODEL", DEFAULT_BASE_MODEL),
-        help="基座模型 ID 或本地路径（仅支持 4bit AWQ）",
+        default=os.environ.get("VLLM_BASE_MODEL", ""),
+        help="基座模型 ID 或本地路径；不传时按 --quantization 自动选 AWQ 或 GPTQ 默认",
+    )
+    parser.add_argument(
+        "--quantization",
+        type=str,
+        choices=("awq", "gptq"),
+        default=os.environ.get("VLLM_QUANTIZATION", "gptq"),
+        help="量化方式：gptq 兼容 V100/算力 70；awq 需算力 75+（默认: gptq）",
     )
     parser.add_argument(
         "--lora-config",
@@ -64,24 +74,36 @@ def main() -> None:
         "--max-lora-rank", type=int, default=64, help="LoRA 最大 rank（与训练一致）",
     )
     parser.add_argument(
+        "--no-quantization",
+        action="store_true",
+        help="使用全精度基座（显存约 60GB+），与 --quantization 二选一",
+    )
+    parser.add_argument(
         "vllm_extra",
         nargs="*",
         help="传给 vllm 的额外参数，如 --tensor-parallel-size 2",
     )
     args = parser.parse_args()
 
-    # 仅支持 4bit AWQ，禁止全精度模型 ID
-    if args.base_model.strip() == "Qwen/Qwen2.5-32B-Instruct":
-        print("错误：不支持全精度基座，请使用 4bit AWQ 模型：Qwen/Qwen2.5-32B-Instruct-AWQ")
-        sys.exit(1)
+    base_model = (args.base_model or "").strip()
+    if args.no_quantization:
+        if not base_model or base_model in (DEFAULT_BASE_MODEL_AWQ, DEFAULT_BASE_MODEL_GPTQ):
+            base_model = "Qwen/Qwen2.5-32B-Instruct"
+        print("提示：已启用 --no-quantization，使用全精度基座，显存需求较大")
+    else:
+        if not base_model:
+            base_model = DEFAULT_BASE_MODEL_GPTQ if args.quantization == "gptq" else DEFAULT_BASE_MODEL_AWQ
+        if base_model == "Qwen/Qwen2.5-32B-Instruct":
+            print("错误：全精度基座请使用 --no-quantization")
+            sys.exit(1)
 
     paths = load_lora_paths(Path(args.lora_config))
-    lora_args = build_lora_modules_args(paths)
+    lora_modules_json = build_lora_modules_json(paths)
 
-    cmd = ["vllm", "serve", args.base_model, "--quantization", "awq"]
-    cmd += ["--enable-lora"]
-    for one in lora_args:
-        cmd += ["--lora-modules", one]
+    cmd = ["vllm", "serve", base_model]
+    if not args.no_quantization:
+        cmd += ["--quantization", args.quantization]
+    cmd += ["--enable-lora", "--lora-modules", lora_modules_json]
     cmd += [
         "--max-loras", str(args.max_loras),
         "--max-lora-rank", str(args.max_lora_rank),

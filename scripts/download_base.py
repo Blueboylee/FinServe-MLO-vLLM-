@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-从 ModelScope 下载 Qwen2.5-32B 基座模型（4bit AWQ，约 18GB），供 vLLM 使用。
+从 ModelScope 下载 Qwen2.5-32B 基座模型（4bit AWQ 或 GPTQ），供 vLLM 使用。
 下载完成后，使用 --base-model 指定本地路径启动服务。
 """
 from __future__ import annotations
@@ -9,24 +9,38 @@ import os
 from pathlib import Path
 
 
-# ModelScope 上的 Qwen2.5-32B-Instruct-AWQ（4bit 量化，约 18GB）
-DEFAULT_BASE_MODEL_ID = "Qwen/Qwen2.5-32B-Instruct-AWQ"
+# 4bit 量化：GPTQ 兼容 V100；AWQ 需算力 75+
+MODEL_ID_AWQ = "Qwen/Qwen2.5-32B-Instruct-AWQ"
+MODEL_ID_GPTQ = "Qwen/Qwen2.5-32B-Instruct-GPTQ-Int4"
 
 
-def download_base(cache_dir: str | Path | None = None) -> str:
-    """从 ModelScope 下载基座模型（仅 4bit AWQ），返回本地路径。"""
-    try:
-        from modelscope import snapshot_download
-    except ImportError:
-        raise ImportError("请先安装 modelscope: pip install modelscope") from None
+def download_base(
+    cache_dir: str | Path | None = None,
+    gptq: bool = False,
+) -> str:
+    """下载基座模型：GPTQ 从 HuggingFace，AWQ 从 ModelScope。返回本地路径。"""
+    model_id = MODEL_ID_GPTQ if gptq else MODEL_ID_AWQ
+    kind = "4bit GPTQ" if gptq else "4bit AWQ"
+    print(f"正在下载基座模型: {model_id}")
+    print(f"  （约 18GB {kind}，请确保磁盘空间充足）")
 
-    cache_dir = Path(cache_dir) if cache_dir else Path.home() / ".cache" / "modelscope" / "hub"
-    cache_dir = cache_dir.resolve()
-    cache_dir.mkdir(parents=True, exist_ok=True)
+    if gptq:
+        try:
+            from huggingface_hub import snapshot_download
+        except ImportError:
+            raise ImportError("下载 GPTQ 需安装: pip install huggingface_hub") from None
+        default_cache = Path.home() / ".cache" / "huggingface" / "hub"
+    else:
+        try:
+            from modelscope import snapshot_download
+        except ImportError:
+            raise ImportError("下载 AWQ 需安装: pip install modelscope") from None
+        default_cache = Path.home() / ".cache" / "modelscope" / "hub"
 
-    print(f"正在从 ModelScope 下载基座模型: {DEFAULT_BASE_MODEL_ID}")
-    print(f"  （约 18GB 4bit AWQ，请确保磁盘空间充足，下载时间视网络而定）")
-    path = snapshot_download(DEFAULT_BASE_MODEL_ID, cache_dir=str(cache_dir))
+    _cache = Path(cache_dir) if cache_dir else default_cache
+    _cache = _cache.resolve()
+    _cache.mkdir(parents=True, exist_ok=True)
+    path = snapshot_download(model_id, cache_dir=str(_cache))
     path = os.path.abspath(path)
     print(f"  -> {path}")
     return path
@@ -34,18 +48,24 @@ def download_base(cache_dir: str | Path | None = None) -> str:
 
 def main() -> None:
     import argparse
-    parser = argparse.ArgumentParser(description="从 ModelScope 下载 Qwen2.5-32B 基座模型（4bit AWQ，约 18GB）")
+    parser = argparse.ArgumentParser(description="下载 Qwen2.5-32B 基座（AWQ 或 GPTQ）")
     parser.add_argument(
         "--cache-dir",
         type=str,
         default=None,
         help="ModelScope 缓存目录，默认 ~/.cache/modelscope/hub",
     )
+    parser.add_argument(
+        "--gptq",
+        action="store_true",
+        help="下载 GPTQ 版本（兼容 V100 等算力 70；不传则下载 AWQ）",
+    )
     args = parser.parse_args()
 
-    path = download_base(cache_dir=args.cache_dir)
+    path = download_base(cache_dir=args.cache_dir, gptq=args.gptq)
+    quant = "gptq" if args.gptq else "awq"
     print(f"\n下载完成。启动服务时使用：")
-    print(f"  python scripts/run_serve.py --base-model {path}")
+    print(f"  python scripts/run_serve.py --base-model {path} --quantization {quant}")
 
 
 if __name__ == "__main__":
