@@ -29,6 +29,35 @@ EXPERT_A_MODEL_ID = "GaryLeenene/qwen25-32b-expert-a-qlora"
 EXPERT_B_MODEL_ID = "GaryLeenene/qwen25-32b-expert-b-qlora"
 
 
+def check_disk_space(path: Path, required_gb: int = 100) -> bool:
+    """
+    检查磁盘空间
+    
+    Args:
+        path: 要检查的路径
+        required_gb: 需要的最小空间（GB）
+    
+    Returns:
+        bool: 空间是否足够
+    """
+    import shutil
+    
+    total, used, free = shutil.disk_usage(str(path))
+    free_gb = free / (1024 ** 3)
+    
+    logger.info(f"磁盘总空间：{total / (1024 ** 3):.2f} GB")
+    logger.info(f"磁盘已使用：{used / (1024 ** 3):.2f} GB")
+    logger.info(f"磁盘可用空间：{free_gb:.2f} GB")
+    logger.info(f"需要空间：约 {required_gb} GB")
+    
+    if free_gb < required_gb:
+        logger.error(f"磁盘空间不足！需要至少 {required_gb} GB，当前只有 {free_gb:.2f} GB")
+        return False
+    
+    logger.info("✓ 磁盘空间充足")
+    return True
+
+
 def setup_directories():
     """创建必要的目录结构"""
     base_dir = Path(__file__).parent
@@ -116,6 +145,12 @@ def main():
     logger.info("=" * 60)
     
     model_dirs = setup_directories()
+    
+    # 检查磁盘空间
+    models_dir = Path(model_dirs['base']).parent
+    if not check_disk_space(models_dir, required_gb=80):
+        logger.error("请先清理磁盘空间或使用更大容量的存储设备")
+        return 1
     
     download_tasks = [
         (BASE_MODEL_ID, model_dirs['base'], "基础模型"),
