@@ -35,6 +35,80 @@ def load_lora_paths(config_path: Path | None = None) -> dict[str, str]:
         return json.load(f)
 
 
+# 与 HuggingFace Qwen2.5-32B-Instruct-GPTQ-Int4 一致的 config，用于修复 ModelScope 错包
+_QWEN25_32B_GPTQ_CONFIG = {
+    "architectures": ["Qwen2ForCausalLM"],
+    "attention_dropout": 0.0,
+    "bos_token_id": 151643,
+    "eos_token_id": 151645,
+    "hidden_act": "silu",
+    "hidden_size": 5120,
+    "initializer_range": 0.02,
+    "intermediate_size": 27648,
+    "max_position_embeddings": 32768,
+    "max_window_layers": 70,
+    "model_type": "qwen2",
+    "num_attention_heads": 40,
+    "num_hidden_layers": 64,
+    "num_key_value_heads": 8,
+    "quantization_config": {
+        "batch_size": 1,
+        "bits": 4,
+        "block_name_to_quantize": None,
+        "cache_block_outputs": True,
+        "damp_percent": 0.01,
+        "dataset": None,
+        "desc_act": False,
+        "exllama_config": {"version": 1},
+        "group_size": 128,
+        "max_input_length": None,
+        "model_seqlen": None,
+        "module_name_preceding_first_block": None,
+        "modules_in_block_to_quantize": None,
+        "pad_token_id": None,
+        "quant_method": "gptq",
+        "sym": True,
+        "tokenizer": None,
+        "true_sequential": True,
+        "use_cuda_fp16": False,
+        "use_exllama": True,
+    },
+    "rms_norm_eps": 1e-06,
+    "rope_theta": 1000000.0,
+    "sliding_window": 131072,
+    "tie_word_embeddings": False,
+    "torch_dtype": "float16",
+    "transformers_version": "4.39.3",
+    "use_cache": True,
+    "use_sliding_window": False,
+    "vocab_size": 152064,
+}
+
+
+def _ensure_gptq_config(model_dir: Path) -> None:
+    """若本地 GPTQ 目录的 config 不是 Qwen2+gptq，则写回正确 config，避免 vLLM 报错。"""
+    model_dir = model_dir.resolve()
+    config_path = model_dir / "config.json"
+    need_fix = True
+    if config_path.is_file():
+        with open(config_path, encoding="utf-8") as f:
+            cur = json.load(f)
+        if cur.get("model_type") == "qwen2" and (cur.get("quantization_config") or {}).get("quant_method") == "gptq":
+            need_fix = False
+    if need_fix:
+        with open(config_path, "w", encoding="utf-8") as f:
+            json.dump(_QWEN25_32B_GPTQ_CONFIG, f, indent=2, ensure_ascii=False)
+        print(f"已修复 {config_path} 为 Qwen2.5-32B GPTQ 配置")
+        quant_path = model_dir / "quantize_config.json"
+        q = _QWEN25_32B_GPTQ_CONFIG["quantization_config"].copy()
+        for k in list(q.keys()):
+            if q[k] is None or k in ("exllama_config", "dataset", "tokenizer"):
+                q.pop(k, None)
+        with open(quant_path, "w", encoding="utf-8") as f:
+            json.dump(q, f, indent=2)
+        print(f"已写入 {quant_path}")
+
+
 def _run_with_vllm_api(
     base_model: str,
     paths: dict[str, str],
@@ -150,6 +224,12 @@ def main() -> None:
             sys.exit(1)
 
     paths = load_lora_paths(Path(args.lora_config))
+
+    # 使用本地 GPTQ 目录时，先确保 config 为 Qwen2 + gptq，避免 ModelScope 错包导致 "Qwen3-0.6B" / "Cannot find the config file for gptq"
+    if args.quantization == "gptq" and not args.no_quantization:
+        base_path = Path(base_model)
+        if base_path.is_dir():
+            _ensure_gptq_config(base_path)
 
     os.chdir(ROOT)
     _run_with_vllm_api(
