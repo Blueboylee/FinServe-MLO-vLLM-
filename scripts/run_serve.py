@@ -33,10 +33,9 @@ def load_lora_paths(config_path: Path | None = None) -> dict[str, str]:
         return json.load(f)
 
 
-def build_lora_modules_json(paths: dict[str, str]) -> str:
-    """vLLM 0.16 支持单次传入 JSON 数组： [{"name":"id","path":"/path"}, ...]，避免 duplicate key。"""
-    modules = [{"name": name, "path": path} for name, path in paths.items()]
-    return json.dumps(modules)
+def build_lora_modules_args(paths: dict[str, str]) -> list[str]:
+    """用 --lora-modules.0 --lora-modules.1 传多个 LoRA，避免单参数 list 被当成 mapping 报错。"""
+    return [json.dumps({"name": name, "path": path}) for name, path in paths.items()]
 
 
 def main() -> None:
@@ -98,12 +97,14 @@ def main() -> None:
             sys.exit(1)
 
     paths = load_lora_paths(Path(args.lora_config))
-    lora_modules_json = build_lora_modules_json(paths)
+    lora_jsons = build_lora_modules_args(paths)
 
     cmd = ["vllm", "serve", base_model]
     if not args.no_quantization:
         cmd += ["--quantization", args.quantization]
-    cmd += ["--enable-lora", "--lora-modules", lora_modules_json]
+    cmd += ["--enable-lora"]
+    for i, js in enumerate(lora_jsons):
+        cmd += [f"--lora-modules.{i}", js]
     cmd += [
         "--max-loras", str(args.max_loras),
         "--max-lora-rank", str(args.max_lora_rank),
