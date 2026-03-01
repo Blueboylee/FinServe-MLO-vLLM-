@@ -131,9 +131,16 @@ def main() -> None:
     base_model_str = str(base_path)
 
     lora_paths = load_lora_paths(Path(args.lora_config))
-    # 使用官方推荐: vllm serve <model> [options]
+    # 用当前 Python 同目录的 vllm 命令（pip 安装的入口），避免 python -m vllm 不可用
+    bindir = Path(sys.executable).parent
+    vllm_cmd = bindir / "vllm"
+    if not vllm_cmd.exists():
+        vllm_cmd = "vllm"
+    else:
+        vllm_cmd = str(vllm_cmd)
     cmd = [
-        sys.executable, "-m", "vllm", "serve",
+        vllm_cmd,
+        "serve",
         base_model_str,
         "--quantization", "gptq",
         "--host", args.host,
