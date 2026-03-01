@@ -31,9 +31,9 @@ def load_lora_paths(config_path: Path | None = None) -> dict[str, str]:
         return json.load(f)
 
 
-def build_lora_modules(paths: dict[str, str]) -> str:
-    """构建 --lora-modules 参数：vLLM 要求 JSON 对象格式，如 {"expert-a":"/path","expert-b":"/path"}"""
-    return json.dumps(paths)
+def build_lora_modules_args(paths: dict[str, str]) -> list[str]:
+    """每个 LoRA 单独传一个 --lora-modules '{"name":"id","path":"/path"}'，多个 LoRA 则多次传参。"""
+    return [json.dumps({"name": name, "path": path}) for name, path in paths.items()]
 
 
 def main() -> None:
@@ -76,12 +76,13 @@ def main() -> None:
         sys.exit(1)
 
     paths = load_lora_paths(Path(args.lora_config))
-    lora_modules = build_lora_modules(paths)
+    lora_args = build_lora_modules_args(paths)
 
     cmd = ["vllm", "serve", args.base_model, "--quantization", "awq"]
+    cmd += ["--enable-lora"]
+    for one in lora_args:
+        cmd += ["--lora-modules", one]
     cmd += [
-        "--enable-lora",
-        "--lora-modules", lora_modules,
         "--max-loras", str(args.max_loras),
         "--max-lora-rank", str(args.max_lora_rank),
         "--host", args.host,
