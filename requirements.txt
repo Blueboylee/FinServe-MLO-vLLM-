@@ -1,0 +1,10 @@
+# Qwen2.5 32B GPTQ + QLoRA 专家推理
+# Python 3.10 兼容
+
+# 模型下载（仅 ModelScope，不使用 HuggingFace）
+modelscope>=1.11.0
+
+# 推理引擎
+vllm>=0.6.0
+torch>=2.0.0
+transformers>=4.37.0
