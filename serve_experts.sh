@@ -34,9 +34,11 @@ echo ""
 
 vllm serve "$BASE_DIR" \
   --quantization gptq \
+  --enable-lora \
+  --max-loras 2 \
+  --max-lora-rank 64 \
   --lora-modules "expert-a=$EXPERT_A" "expert-b=$EXPERT_B" \
   --host "$HOST" \
   --port "$PORT" \
   --gpu-memory-utilization 0.9 \
-  --max-lora-rank 64 \
   --max-num-seqs 256

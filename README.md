@@ -46,17 +46,31 @@ python run_inference.py --expert expert-b --prompt "你的问题"
 python run_inference.py --expert expert-a --prompt "你好" --max-tokens 256 --temperature 0.8
 ```
 
-## 3. 启动 HTTP 服务
+## 3. 启动 vLLM 多专家 HTTP 服务
+
+**方式一：Shell 脚本**
 
 ```bash
 chmod +x serve_experts.sh
 ./serve_experts.sh
 ```
 
-或指定目录和端口：
+**方式二：Python 脚本**
+
+```bash
+python serve_experts.py
+```
+
+指定目录和端口：
 
 ```bash
 BASE_DIR=./models/base EXPERTS_DIR=./models/experts PORT=8000 ./serve_experts.sh
+```
+
+**测试服务**
+
+```bash
+python test_serve.py --url http://localhost:8000
 ```
 
 请求时通过 `model` 参数切换专家：
