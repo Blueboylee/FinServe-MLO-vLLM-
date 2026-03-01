@@ -6,8 +6,8 @@
   1. 必须指定基座路径（服务器上已下载的 GPTQ 目录）:
      python scripts/run_serve.py --base-model /root/.cache/modelscope/hub/Qwen/Qwen2.5-32B-Instruct-GPTQ-Int4
 
-  2. 若已运行 download_experts.py 并生成了 lora_paths.json，会自动加载专家 LoRA；
-     否则只启动基座，不加 LoRA。
+  2. 若已在项目根目录有 lora_paths.json（运行 download_experts.py 时用 --output-config lora_paths.json），
+     会自动加载专家 LoRA；否则只启动基座。
 
   3. 额外参数会原样传给 vllm，例如:
      python scripts/run_serve.py --base-model /path/to/gptq --tensor-parallel-size 2
