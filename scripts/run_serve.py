@@ -131,15 +131,11 @@ def main() -> None:
     base_model_str = str(base_path)
 
     lora_paths = load_lora_paths(Path(args.lora_config))
-    # 用当前 Python 同目录的 vllm 命令（pip 安装的入口），避免 python -m vllm 不可用
-    bindir = Path(sys.executable).parent
-    vllm_cmd = bindir / "vllm"
-    if not vllm_cmd.exists():
-        vllm_cmd = "vllm"
-    else:
-        vllm_cmd = str(vllm_cmd)
+    # 使用 python -m vllm.entrypoints.cli serve（部分环境里 vllm 脚本错误地调用 python -m vllm 会报 No module named vllm.__main__）
     cmd = [
-        vllm_cmd,
+        sys.executable,
+        "-m",
+        "vllm.entrypoints.cli",
         "serve",
         base_model_str,
         "--quantization", "gptq",
