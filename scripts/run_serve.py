@@ -2,12 +2,14 @@
 """
 启动 vLLM 服务：Qwen2.5-32B 基座 + 专家 A / 专家 B 双 LoRA。
 需先运行 scripts/download_experts.py 下载 LoRA 并生成 lora_paths.json。
+
+因 vLLM CLI 对多 LoRA 传参有 bug，本脚本用 Python 直接调 vLLM 的 run_server，
+在代码里传入 lora_modules 列表，绕过 --lora-modules 解析问题。
 """
 from __future__ import annotations
 
 import json
 import os
-import subprocess
 import sys
 from pathlib import Path
 
@@ -33,9 +35,60 @@ def load_lora_paths(config_path: Path | None = None) -> dict[str, str]:
         return json.load(f)
 
 
-def build_lora_modules_args(paths: dict[str, str]) -> list[str]:
-    """用 --lora-modules.0 --lora-modules.1 传多个 LoRA，避免单参数 list 被当成 mapping 报错。"""
-    return [json.dumps({"name": name, "path": path}) for name, path in paths.items()]
+def _run_with_vllm_api(
+    base_model: str,
+    paths: dict[str, str],
+    *,
+    quantization: str = "gptq",
+    no_quantization: bool = False,
+    host: str = "0.0.0.0",
+    port: int = 8000,
+    max_loras: int = 2,
+    max_lora_rank: int = 64,
+    vllm_extra: list[str],
+) -> None:
+    """用 vLLM Python API 启动服务，直接传入 lora_modules 列表，避免 CLI 解析问题。"""
+    from vllm.entrypoints.utils import cli_env_setup
+    cli_env_setup()
+
+    from vllm.entrypoints.openai.cli_args import make_arg_parser, validate_parsed_serve_args
+    from vllm.entrypoints.openai.models.protocol import LoRAModulePath
+    from vllm.utils.argparse_utils import FlexibleArgumentParser
+
+    # 构造等价于 "vllm serve <model> --quantization gptq --enable-lora --max-loras 2 ..." 的 argv，不传 --lora-modules
+    argv = [
+        "vllm_serve",
+        base_model,
+        "--enable-lora",
+        "--max-loras", str(max_loras),
+        "--max-lora-rank", str(max_lora_rank),
+        "--host", host,
+        "--port", str(port),
+    ]
+    if not no_quantization:
+        argv += ["--quantization", quantization]
+    argv += vllm_extra
+
+    old_argv = sys.argv
+    try:
+        sys.argv = argv
+        parser = make_arg_parser(FlexibleArgumentParser(description="vLLM OpenAI API server"))
+        args = parser.parse_args()
+    finally:
+        sys.argv = old_argv
+
+    # 在代码里注入多 LoRA，绕过 CLI 无法正确传 list 的问题
+    args.lora_modules = [
+        LoRAModulePath(name=name, path=path)
+        for name, path in paths.items()
+    ]
+    validate_parsed_serve_args(args)
+
+    import uvloop
+    from vllm.entrypoints.openai.api_server import run_server
+
+    print("启动 vLLM 服务（Python API，多 LoRA 已注入）:", base_model, "LoRAs:", list(paths.keys()))
+    uvloop.run(run_server(args))
 
 
 def main() -> None:
@@ -97,21 +150,19 @@ def main() -> None:
             sys.exit(1)
 
     paths = load_lora_paths(Path(args.lora_config))
-    lora_jsons = build_lora_modules_args(paths)
 
-    cmd = ["vllm", "serve", base_model]
-    if not args.no_quantization:
-        cmd += ["--quantization", args.quantization]
-    cmd += ["--enable-lora", "--lora-modules"] + lora_jsons
-    cmd += [
-        "--max-loras", str(args.max_loras),
-        "--max-lora-rank", str(args.max_lora_rank),
-        "--host", args.host,
-        "--port", str(args.port),
-    ] + args.vllm_extra
-
-    print("执行:", " ".join(cmd))
-    subprocess.run(cmd, cwd=str(ROOT))
+    os.chdir(ROOT)
+    _run_with_vllm_api(
+        base_model,
+        paths,
+        quantization=args.quantization,
+        no_quantization=args.no_quantization,
+        host=args.host,
+        port=args.port,
+        max_loras=args.max_loras,
+        max_lora_rank=args.max_lora_rank,
+        vllm_extra=args.vllm_extra,
+    )
 
 
 if __name__ == "__main__":
