@@ -102,9 +102,7 @@ def main() -> None:
     cmd = ["vllm", "serve", base_model]
     if not args.no_quantization:
         cmd += ["--quantization", args.quantization]
-    cmd += ["--enable-lora"]
-    for i, js in enumerate(lora_jsons):
-        cmd += [f"--lora-modules.{i}", js]
+    cmd += ["--enable-lora", "--lora-modules"] + lora_jsons
     cmd += [
         "--max-loras", str(args.max_loras),
         "--max-lora-rank", str(args.max_lora_rank),
