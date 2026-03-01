@@ -1,105 +1,154 @@
-# Qwen2.5 32B 专家模型推理
+# Qwen2.5-32B 双专家模型 vLLM 部署
 
-共享 Qwen2.5 32B 4bit GPTQ 基座，加载两个 QLoRA 专家（Expert A / Expert B）进行推理。适配 V100 GPU，所有模型从 **ModelScope** 下载。
+基于 vLLM 的 Qwen2.5-32B 双专家模型（Expert A 和 Expert B）部署方案，支持从 ModelScope 下载模型并在 V100 GPU 上运行。
 
 ## 环境要求
 
 - Python 3.10
-- CUDA（V100 或更高）
-- 显存：建议 24GB+（32B 4bit GPTQ 约需 18–20GB）
+- NVIDIA V100 GPU (16GB)
+- CUDA 11.8+
+- vLLM 0.6.x+
 
-## 安装
+## 快速开始
+
+### 1. 安装依赖
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## 1. 下载模型
+### 2. 下载模型
 
-所有模型从 ModelScope 下载（不使用 HuggingFace）：
+从 ModelScope 下载两个专家模型：
 
 ```bash
 python download_models.py
 ```
 
-默认保存到：
-- 基座：`./models/base`（Qwen/Qwen2.5-32B-Instruct-GPTQ-Int4）
-- 专家 A：`./models/experts/expert-a`（GaryLeenene/qwen25-32b-expert-a-qlora）
-- 专家 B：`./models/experts/expert-b`（GaryLeenene/qwen25-32b-expert-b-qlora）
+这会自动下载：
+- `GaryLeenene/qwen25-32b-expert-a-qlora`
+- `GaryLeenene/qwen25-32b-expert-b-qlora`
 
-可选参数：
-- `--base-dir DIR`：基座保存目录
-- `--experts-dir DIR`：专家保存根目录
-- `--base-only`：仅下载基座
-- `--experts-only`：仅下载专家
-
-## 2. 离线推理
+### 3. 启动 API 服务器
 
 ```bash
+python api_server.py --port 8000 --gpu-memory-utilization 0.85
+```
+
+### 4. 测试调用
+
+```bash
+python test_api.py
+```
+
+## 使用方式
+
+### API 调用示例
+
+```python
+import requests
+
 # 使用专家 A
-python run_inference.py --expert expert-a --prompt "你的问题"
+response = requests.post(
+    "http://localhost:8000/generate",
+    json={
+        "prompt": "你好，请介绍一下你自己。",
+        "expert": "expert_a",
+        "max_tokens": 512,
+        "temperature": 0.7
+    }
+)
+print(response.json()["text"])
 
 # 使用专家 B
-python run_inference.py --expert expert-b --prompt "你的问题"
-
-# 自定义参数
-python run_inference.py --expert expert-a --prompt "你好" --max-tokens 256 --temperature 0.8
+response = requests.post(
+    "http://localhost:8000/generate",
+    json={
+        "prompt": "什么是机器学习？",
+        "expert": "expert_b",
+        "max_tokens": 512,
+        "temperature": 0.7
+    }
+)
+print(response.json()["text"])
 ```
 
-## 3. 启动 vLLM 多专家 HTTP 服务
-
-**方式一：Shell 脚本**
+### cURL 调用
 
 ```bash
-chmod +x serve_experts.sh
-./serve_experts.sh
-```
+# 健康检查
+curl http://localhost:8000/health
 
-**方式二：Python 脚本**
-
-```bash
-python serve_experts.py
-```
-
-指定目录和端口：
-
-```bash
-BASE_DIR=./models/base EXPERTS_DIR=./models/experts PORT=8000 ./serve_experts.sh
-```
-
-**测试服务**
-
-```bash
-python test_serve.py --url http://localhost:8000
-```
-
-请求时通过 `model` 参数切换专家：
-- `expert-a`
-- `expert-b`
-
-示例（OpenAI 兼容 API）：
-
-```bash
-curl http://localhost:8000/v1/completions \
+# 使用专家 A 生成
+curl -X POST http://localhost:8000/generate \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "expert-a",
-    "prompt": "你好，请介绍一下你自己。",
+    "prompt": "你好",
+    "expert": "expert_a",
+    "max_tokens": 256
+  }'
+
+# 使用专家 B 生成
+curl -X POST http://localhost:8000/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "你好",
+    "expert": "expert_b",
     "max_tokens": 256
   }'
 ```
 
-## 模型来源
+## 配置参数
 
-| 模型 | ModelScope ID |
-|------|---------------|
-| 基座（GPTQ 4bit） | Qwen/Qwen2.5-32B-Instruct-GPTQ-Int4 |
-| 专家 A | GaryLeenene/qwen25-32b-expert-a-qlora |
-| 专家 B | GaryLeenene/qwen25-32b-expert-b-qlora |
+### api_server.py 参数
 
-## 故障排查
+- `--host`: 监听地址 (默认：0.0.0.0)
+- `--port`: 端口号 (默认：8000)
+- `--max-model-len`: 最大序列长度 (默认：4096)
+- `--gpu-memory-utilization`: GPU 内存利用率 (默认：0.85，V100 建议值)
 
-1. **显存不足**：在 `run_inference.py` 或 `serve_experts.sh` 中调低 `gpu_memory_utilization`（如 0.8）。
-2. **基座模型在 ModelScope 上不存在**：若 `Qwen/Qwen2.5-32B-Instruct-GPTQ-Int4` 不可用，可在 `download_models.py` 中修改 `BASE_MODEL_ID` 为 ModelScope 上可用的 GPTQ 版本。
-3. **LoRA 加载失败**：确认专家模型为 QLoRA 格式，且与基座架构一致。
-4. **`FA version 2 is not supported`**：V100 不支持 Flash Attention 2。已默认使用 `--attention-backend XFORMERS`，需安装 `pip install xformers`。
+### 生成参数
+
+- `prompt`: 输入提示文本
+- `expert`: 使用的专家模型 ("expert_a" 或 "expert_b")
+- `max_tokens`: 最大生成 token 数 (1-2048)
+- `temperature`: 温度参数 (0.0-2.0)
+- `top_p`: Top-p 采样参数 (0.0-1.0)
+- `top_k`: Top-k 采样参数 (-1 表示禁用)
+- `presence_penalty`: 存在惩罚 (-2.0 到 2.0)
+- `frequency_penalty`: 频率惩罚 (-2.0 到 2.0)
+
+## API 文档
+
+启动服务器后访问：http://localhost:8000/docs
+
+## 文件说明
+
+- `download_models.py`: 从 ModelScope 下载模型
+- `api_server.py`: API 服务器主程序
+- `deploy_experts.py`: 本地部署测试脚本
+- `test_api.py`: API 测试脚本
+- `requirements.txt`: Python 依赖包
+
+## 故障排除
+
+### 显存不足
+
+降低 GPU 内存利用率：
+
+```bash
+python api_server.py --gpu-memory-utilization 0.75
+```
+
+### 模型下载失败
+
+检查网络连接，或手动下载：
+
+```bash
+modelscope download --model GaryLeenene/qwen25-32b-expert-a-qlora
+modelscope download --model GaryLeenene/qwen25-32b-expert-b-qlora
+```
+
+## 许可证
+
+本项目仅供学习和研究使用。
