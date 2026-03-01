@@ -16,12 +16,16 @@ from peft import PeftModel
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 
+# 确保日志目录存在
+log_dir = Path(__file__).parent / 'logs'
+log_dir.mkdir(exist_ok=True)
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(sys.stdout),
-        logging.FileHandler('logs/inference.log', mode='a')
+        logging.FileHandler(log_dir / 'inference.log', mode='a')
     ]
 )
 logger = logging.getLogger(__name__)

@@ -9,12 +9,16 @@ import logging
 from pathlib import Path
 from modelscope.hub.snapshot_download import snapshot_download
 
+# 确保日志目录存在
+log_dir = Path(__file__).parent / 'logs'
+log_dir.mkdir(exist_ok=True)
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(sys.stdout),
-        logging.FileHandler('logs/download.log', mode='w')
+        logging.FileHandler(log_dir / 'download.log', mode='w')
     ]
 )
 logger = logging.getLogger(__name__)
