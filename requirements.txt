@@ -1,22 +1,20 @@
-# Python 依赖包
-# 基础依赖
-torch>=2.1.0
-transformers>=4.37.0
+# Qwen2.5 32B LoRA vLLM 部署依赖
+# Python 3.10+ required
 
-# vLLM 核心
+# 核心依赖
 vllm>=0.6.0
-
-# ModelScope
 modelscope>=1.9.0
 
-# API 服务器
-fastapi>=0.104.0
-uvicorn>=0.24.0
-pydantic>=2.5.0
+# 可选依赖
+transformers>=4.37.0
+accelerate>=0.25.0
+peft>=0.8.0
 
 # 工具库
-requests>=2.31.0
-
-# 可选：加速库
-accelerate>=0.25.0
+torch>=2.1.0
 sentencepiece>=0.1.99
+
+# API 服务依赖
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pydantic>=2.0.0

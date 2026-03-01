@@ -1,54 +1,49 @@
 #!/bin/bash
-# 快速启动脚本
+# Ubuntu 22.04 服务器启动脚本
+# 用于一键启动 Qwen2.5 32B LoRA 服务
+
+set -e
 
 echo "=========================================="
-echo "启动 Qwen2.5-32B 双专家模型服务"
+echo "Qwen2.5 32B LoRA 服务启动脚本"
 echo "=========================================="
 
-# 检查模型是否已下载
-if [ ! -f "models/model_paths.txt" ]; then
-    echo "✗ 模型未下载，请先运行：bash install.sh 或 python download_models.py"
-    exit 1
+# 检查 Python 版本
+PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+echo "检测到 Python 版本：$PYTHON_VERSION"
+
+if [[ ! $PYTHON_VERSION =~ ^3.10 ]]; then
+    echo "警告：建议使用 Python 3.10，当前版本为 $PYTHON_VERSION"
 fi
 
-# 默认参数
-PORT=8000
-GPU_UTILIZATION=0.85
-MAX_MODEL_LEN=4096
+# 检查虚拟环境
+if [ ! -d "venv" ]; then
+    echo "创建虚拟环境..."
+    python3 -m venv venv
+fi
 
-# 解析参数
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --port)
-            PORT="$2"
-            shift 2
-            ;;
-        --gpu-utilization)
-            GPU_UTILIZATION="$2"
-            shift 2
-            ;;
-        --max-model-len)
-            MAX_MODEL_LEN="$2"
-            shift 2
-            ;;
-        *)
-            echo "未知参数：$1"
-            echo "用法：./start.sh [--port 8000] [--gpu-utilization 0.85] [--max-model-len 4096]"
-            exit 1
-            ;;
-    esac
-done
+# 激活虚拟环境
+echo "激活虚拟环境..."
+source venv/bin/activate
 
+# 检查依赖
+echo "检查依赖..."
+if ! python -c "import vllm" 2>/dev/null; then
+    echo "安装依赖..."
+    pip install -r requirements.txt -q
+fi
+
+# 检查模型
+if [ ! -f "models/model_config.txt" ]; then
+    echo "模型未下载，开始下载..."
+    python download_models.py
+fi
+
+# 启动服务
 echo ""
-echo "配置信息:"
-echo "  端口：$PORT"
-echo "  GPU 内存利用率：$GPU_UTILIZATION"
-echo "  最大序列长度：$MAX_MODEL_LEN"
+echo "=========================================="
+echo "启动 vLLM 服务..."
+echo "=========================================="
 echo ""
 
-# 启动服务器
-echo "启动 API 服务器..."
-python api_server.py \
-    --port $PORT \
-    --gpu-memory-utilization $GPU_UTILIZATION \
-    --max-model-len $MAX_MODEL_LEN
+python serve_lora.py "$@"
