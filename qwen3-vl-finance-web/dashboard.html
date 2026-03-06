@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Qwen3-VL Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+          "Segoe UI", sans-serif;
+        background: #f8fafc;
+        color: #1e293b;
+      }
+      .page {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 16px;
+      }
+      h1 {
+        margin: 0 0 4px;
+        font-size: 1.6rem;
+      }
+      h2 {
+        margin: 16px 0 8px;
+        font-size: 1.1rem;
+        color: #64748b;
+      }
+      .subtitle {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin-bottom: 12px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+      }
+      .card {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 10px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+      .card-title {
+        font-size: 0.85rem;
+        color: #64748b;
+        margin-bottom: 4px;
+      }
+      .card-main {
+        font-size: 1.3rem;
+        font-weight: 600;
+      }
+      .card-sub {
+        font-size: 0.8rem;
+        color: #64748b;
+        margin-top: 2px;
+      }
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 6px;
+      }
+      .tag {
+        font-size: 0.75rem;
+        padding: 2px 6px;
+        border-radius: 999px;
+        border: 1px solid #cbd5e1;
+        background: #f1f5f9;
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        margin-right: 4px;
+      }
+      .status-ok {
+        background: #22c55e;
+      }
+      .status-bad {
+        background: #ef4444;
+      }
+      .small {
+        font-size: 0.8rem;
+        color: #64748b;
+      }
+      .mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+          "Courier New", monospace;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.8rem;
+      }
+      th,
+      td {
+        border-bottom: 1px solid #e2e8f0;
+        padding: 4px 6px;
+        text-align: left;
+      }
+      th {
+        color: #64748b;
+        font-weight: 500;
+      }
+      .chart-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      .chart-card {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+      .chart-card .card-title {
+        margin-bottom: 8px;
+      }
+      .chart-container {
+        position: relative;
+        height: 180px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <h1>Qwen3-VL Serving Dashboard</h1>
+      <div class="subtitle">
+        最近 5 分钟的请求统计（由 Web Proxy 采样，针对 <span class="mono">/v1/chat/completions</span>）
+      </div>
+
+      <div id="status" class="row">
+        <div>
+          <span class="status-dot status-bad"></span>
+          <span id="status-text">加载中...</span>
+        </div>
+        <div class="small">
+          活跃请求：<span id="active-req">0</span> ，统计窗口：<span id="window-sec">0</span>s
+        </div>
+      </div>
+
+      <h2>用户体验 (Latency)</h2>
+      <div class="grid">
+        <div class="card">
+          <div class="card-title">E2E Latency (Avg)</div>
+          <div class="card-main"><span id="lat-avg">–</span> <span class="small">ms</span></div>
+          <div class="card-sub">端到端请求平均耗时</div>
+        </div>
+        <div class="card">
+          <div class="card-title">E2E Latency (P95)</div>
+          <div class="card-main"><span id="lat-p95">–</span> <span class="small">ms</span></div>
+          <div class="card-sub">长尾请求 (95%)</div>
+        </div>
+        <div class="card">
+          <div class="card-title">E2E Latency (P99)</div>
+          <div class="card-main"><span id="lat-p99">–</span> <span class="small">ms</span></div>
+          <div class="card-sub">极端长尾 (99%)</div>
+        </div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-card" style="grid-column: 1 / -1;">
+          <div class="card-title">Latency 趋势 (Avg / P95 / P99)</div>
+          <div class="chart-container"><canvas id="chart-latency"></canvas></div>
+        </div>
+      </div>
+
+      <h2>吞吐 / 负载</h2>
+      <div class="grid">
+        <div class="card">
+          <div class="card-title">RPS (approx)</div>
+          <div class="card-main"><span id="rps">–</span> <span class="small">req/s</span></div>
+          <div class="card-sub">窗口内请求数 / 窗口秒数</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Total Throughput</div>
+          <div class="card-main">
+            <span id="tps">–</span> <span class="small">tokens/s</span>
+          </div>
+          <div class="card-sub">总吞吐量 (Input + Output Tokens)</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Recent Requests</div>
+          <div class="card-main"><span id="req-recent">0</span></div>
+          <div class="card-sub">窗口内推理请求数量</div>
+        </div>
+        <div class="card">
+          <div class="card-title">KV Cache Usage</div>
+          <div class="card-main">
+            <span id="kv-usage">–</span> <span class="small">%</span>
+          </div>
+          <div class="card-sub">来自 vLLM <span class="mono">/metrics</span></div>
+        </div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-card">
+          <div class="card-title">RPS 趋势</div>
+          <div class="chart-container"><canvas id="chart-rps"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="card-title">Throughput (tokens/s) 趋势</div>
+          <div class="chart-container"><canvas id="chart-tps"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="card-title">KV Cache Usage 趋势</div>
+          <div class="chart-container"><canvas id="chart-kv"></canvas></div>
+        </div>
+      </div>
+
+      <h2>可靠性</h2>
+      <div class="grid">
+        <div class="card">
+          <div class="card-title">Success Rate</div>
+          <div class="card-main">
+            <span id="succ-rate">–</span> <span class="small">%</span>
+          </div>
+          <div class="card-sub">窗口内成功请求占比</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Error Rate</div>
+          <div class="card-main">
+            <span id="err-rate">–</span> <span class="small">%</span>
+          </div>
+          <div class="card-sub">窗口内错误请求占比</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Finish Reason (Top)</div>
+          <div class="card-sub">
+            <div class="tags" id="finish-tags"></div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-card" style="grid-column: 1 / -1;">
+          <div class="card-title">成功率 / 错误率 趋势</div>
+          <div class="chart-container"><canvas id="chart-reliability"></canvas></div>
+        </div>
+      </div>
+
+      <h2>错误分布 (By Status Code)</h2>
+      <div class="card">
+        <table id="status-table">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Count</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="small" style="margin-top: 12px; color: #94a3b8;">
+        说明：目前 Dashboard 只统计通过 Web Proxy 的 <span class="mono">/v1/chat/completions</span>
+        请求。TTFT / TPOT / GPU 利用率等更底层指标需要接入 Prometheus 或 GPU 监控，如需我可以之后帮你接入。
+      </div>
+    </div>
+
+    <script>
+      const MAX_POINTS = 100;
+      const history = {
+        labels: [],
+        latAvg: [], latP95: [], latP99: [],
+        rps: [], tps: [],
+        successRate: [], errorRate: [],
+        kvUsage: []
+      };
+
+      const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color: "#475569", font: { size: 11 } } }
+        },
+        scales: {
+          x: {
+            grid: { color: "#e2e8f0" },
+            ticks: { color: "#64748b", maxTicksLimit: 8 }
+          },
+          y: {
+            grid: { color: "#e2e8f0" },
+            ticks: { color: "#64748b" }
+          }
+        }
+      };
+
+      const chartOptionsPercent = {
+        ...chartOptions,
+        scales: {
+          ...chartOptions.scales,
+          y: {
+            ...chartOptions.scales.y,
+            suggestedMin: 0,
+            suggestedMax: 100
+          }
+        }
+      };
+
+      let chartLatency, chartRps, chartTps, chartKv, chartReliability;
+
+      function initCharts() {
+        const ctxLat = document.getElementById("chart-latency").getContext("2d");
+        chartLatency = new Chart(ctxLat, {
+          type: "line",
+          data: {
+            labels: history.labels,
+            datasets: [
+              { label: "Avg (ms)", data: history.latAvg, borderColor: "#22c55e", backgroundColor: "rgba(34,197,94,0.1)", fill: true, tension: 0.3 },
+              { label: "P95 (ms)", data: history.latP95, borderColor: "#f59e0b", backgroundColor: "rgba(245,158,11,0.05)", fill: true, tension: 0.3 },
+              { label: "P99 (ms)", data: history.latP99, borderColor: "#ef4444", backgroundColor: "rgba(239,68,68,0.05)", fill: true, tension: 0.3 }
+            ]
+          },
+          options: chartOptions
+        });
+
+        const ctxRps = document.getElementById("chart-rps").getContext("2d");
+        chartRps = new Chart(ctxRps, {
+          type: "line",
+          data: {
+            labels: history.labels,
+            datasets: [
+              { label: "RPS", data: history.rps, borderColor: "#3b82f6", backgroundColor: "rgba(59,130,246,0.1)", fill: true, tension: 0.3 }
+            ]
+          },
+          options: chartOptions
+        });
+
+        const ctxTps = document.getElementById("chart-tps").getContext("2d");
+        chartTps = new Chart(ctxTps, {
+          type: "line",
+          data: {
+            labels: history.labels,
+            datasets: [
+              { label: "tokens/s", data: history.tps, borderColor: "#8b5cf6", backgroundColor: "rgba(139,92,246,0.1)", fill: true, tension: 0.3 }
+            ]
+          },
+          options: chartOptions
+        });
+
+        const ctxKv = document.getElementById("chart-kv").getContext("2d");
+        chartKv = new Chart(ctxKv, {
+          type: "line",
+          data: {
+            labels: history.labels,
+            datasets: [
+              { label: "KV Cache %", data: history.kvUsage, borderColor: "#0ea5e9", backgroundColor: "rgba(14,165,233,0.12)", fill: true, tension: 0.3 }
+            ]
+          },
+          options: chartOptionsPercent
+        });
+
+        const ctxRel = document.getElementById("chart-reliability").getContext("2d");
+        chartReliability = new Chart(ctxRel, {
+          type: "line",
+          data: {
+            labels: history.labels,
+            datasets: [
+              { label: "成功率 %", data: history.successRate, borderColor: "#22c55e", backgroundColor: "rgba(34,197,94,0.1)", fill: true, tension: 0.3 },
+              { label: "错误率 %", data: history.errorRate, borderColor: "#ef4444", backgroundColor: "rgba(239,68,68,0.1)", fill: true, tension: 0.3 }
+            ]
+          },
+          options: chartOptionsPercent
+        });
+      }
+
+      function pushHistory(m) {
+        const t = new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+        history.labels.push(t);
+        if (history.labels.length > MAX_POINTS) {
+          history.labels.shift();
+          history.latAvg.shift(); history.latP95.shift(); history.latP99.shift();
+          history.rps.shift(); history.tps.shift();
+          history.successRate.shift(); history.errorRate.shift();
+          history.kvUsage.shift();
+        }
+
+        const lat = m.latency || {};
+        history.latAvg.push(lat.avg_ms != null && !isNaN(lat.avg_ms) ? lat.avg_ms : null);
+        history.latP95.push(lat.p95_ms != null && !isNaN(lat.p95_ms) ? lat.p95_ms : null);
+        history.latP99.push(lat.p99_ms != null && !isNaN(lat.p99_ms) ? lat.p99_ms : null);
+
+        const win = m.window_sec || 1;
+        const rps = m.requests?.recent_count ? m.requests.recent_count / win : 0;
+        history.rps.push(rps);
+        const thr = m.throughput || {};
+        history.tps.push(thr.tokens_per_s != null && !isNaN(thr.tokens_per_s) ? thr.tokens_per_s : null);
+
+        const rel = m.reliability || {};
+        history.successRate.push(rel.success_rate_percent != null && !isNaN(rel.success_rate_percent) ? rel.success_rate_percent : null);
+        history.errorRate.push(rel.error_rate_percent != null && !isNaN(rel.error_rate_percent) ? rel.error_rate_percent : null);
+
+        const kv = m.kv_cache || {};
+        history.kvUsage.push(kv.usage_percent != null && !isNaN(kv.usage_percent) ? kv.usage_percent : null);
+
+        chartLatency?.update("none");
+        chartRps?.update("none");
+        chartTps?.update("none");
+        chartKv?.update("none");
+        chartReliability?.update("none");
+      }
+
+      async function fetchMetrics() {
+        try {
+          const resp = await fetch("/dashboard-metrics");
+          if (!resp.ok) throw new Error("HTTP " + resp.status);
+          const m = await resp.json();
+
+          document.getElementById("window-sec").textContent = m.window_sec ?? 0;
+          document.getElementById("active-req").textContent =
+            m.active_requests ?? 0;
+
+          const ok =
+            (m.reliability && m.reliability.success_rate_percent > 90) || false;
+          document.getElementById("status-text").textContent = ok
+            ? "Online"
+            : "Degraded / Warming up";
+          document
+            .querySelector(".status-dot")
+            .classList.toggle("status-ok", ok);
+          document
+            .querySelector(".status-dot")
+            .classList.toggle("status-bad", !ok);
+
+          const lat = m.latency || {};
+          const fmt = (x) =>
+            x == null || isNaN(x) ? "–" : x.toFixed(1).toString();
+          document.getElementById("lat-avg").textContent = fmt(lat.avg_ms);
+          document.getElementById("lat-p95").textContent = fmt(lat.p95_ms);
+          document.getElementById("lat-p99").textContent = fmt(lat.p99_ms);
+
+          const thr = m.throughput || {};
+          const win = m.window_sec || 1;
+          const rps =
+            m.requests && m.requests.recent_count
+              ? m.requests.recent_count / win
+              : 0;
+          document.getElementById("rps").textContent = fmt(rps);
+          document.getElementById("tps").textContent = fmt(thr.tokens_per_s);
+          document.getElementById("req-recent").textContent =
+            m.requests && m.requests.recent_count
+              ? m.requests.recent_count
+              : 0;
+
+          const kv = m.kv_cache || {};
+          document.getElementById("kv-usage").textContent = fmt(kv.usage_percent);
+
+          const rel = m.reliability || {};
+          document.getElementById("succ-rate").textContent = fmt(
+            rel.success_rate_percent
+          );
+          document.getElementById("err-rate").textContent = fmt(
+            rel.error_rate_percent
+          );
+
+          // finish reason tags
+          const tagsEl = document.getElementById("finish-tags");
+          tagsEl.innerHTML = "";
+          const fr = rel.finish_reason || {};
+          Object.entries(fr)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 4)
+            .forEach(([reason, count]) => {
+              const div = document.createElement("div");
+              div.className = "tag";
+              div.textContent = reason + ": " + count;
+              tagsEl.appendChild(div);
+            });
+
+          // status table
+          const tbody = document.querySelector("#status-table tbody");
+          tbody.innerHTML = "";
+          const byStatus = rel.by_status || {};
+          Object.entries(byStatus)
+            .sort((a, b) => Number(a[0]) - Number(b[0]))
+            .forEach(([code, count]) => {
+              const tr = document.createElement("tr");
+              const td1 = document.createElement("td");
+              td1.textContent = code;
+              const td2 = document.createElement("td");
+              td2.textContent = String(count);
+              tr.appendChild(td1);
+              tr.appendChild(td2);
+              tbody.appendChild(tr);
+            });
+
+          pushHistory(m);
+        } catch (err) {
+          console.error(err);
+          document.getElementById("status-text").textContent =
+            "无法获取 /dashboard-metrics";
+        }
+      }
+
+      initCharts();
+      fetchMetrics();
+      setInterval(fetchMetrics, 3000);
+    </script>
+  </body>
+</html>
+

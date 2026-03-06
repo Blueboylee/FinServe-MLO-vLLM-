@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Qwen3-VL Finance Chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+          "Segoe UI", sans-serif;
+        color: #0f172a;
+        background: #f7f7f8;
+      }
+      .app {
+        min-height: 100vh;
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .app-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        color: #0f172a;
+      }
+      .app-header h1 {
+        margin: 0;
+        font-size: 1.4rem;
+      }
+      .app-header p {
+        margin: 4px 0 0;
+        font-size: 0.9rem;
+        color: #64748b;
+      }
+      .model-select {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .model-select select {
+        margin-left: 4px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        color: #0f172a;
+      }
+      button {
+        border-radius: 999px;
+        border: none;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        background: #10b981;
+        color: #ffffff;
+      }
+      button[disabled] {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+      .chat-container {
+        flex: 1;
+        min-height: 0;
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+      }
+      .messages {
+        height: 100%;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .message {
+        max-width: 80%;
+        padding: 8px 10px;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        white-space: pre-wrap;
+      }
+      .message-user {
+        align-self: flex-end;
+        background: #dcfce7;
+        color: #052e16;
+      }
+      .message-assistant {
+        align-self: flex-start;
+        background: #ffffff;
+        color: #0f172a;
+        border: 1px solid #e2e8f0;
+      }
+      .message-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2px;
+        font-size: 0.7rem;
+        opacity: 0.7;
+      }
+      .message-role {
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .message-model {
+        padding: 1px 6px;
+        border-radius: 999px;
+        border: 1px solid #cbd5e1;
+      }
+      .message-image {
+        display: block;
+        max-width: 340px;
+        width: 100%;
+        margin-top: 6px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+      }
+      .empty-tip {
+        margin-top: 24px;
+        text-align: center;
+        color: #64748b;
+        font-size: 0.9rem;
+      }
+      .input-area {
+        margin-top: 8px;
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 8px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+      }
+      .input-area form {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      textarea {
+        width: 100%;
+        resize: none;
+        border-radius: 12px;
+        border: 1px solid #cbd5e1;
+        padding: 8px 10px;
+        background: #ffffff;
+        color: #0f172a;
+        font-family: inherit;
+        font-size: 0.95rem;
+      }
+      textarea:focus {
+        outline: 2px solid rgba(16, 185, 129, 0.35);
+        border-color: #10b981;
+      }
+      .input-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.8rem;
+        color: #64748b;
+      }
+      .input-attachments {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        color: #64748b;
+      }
+      .file-input {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .file-input input[type="file"] {
+        font-size: 0.85rem;
+      }
+      .attach-preview {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        background: #f8fafc;
+      }
+      .attach-preview img {
+        width: 44px;
+        height: 44px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+      }
+      .attach-name {
+        max-width: 320px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .btn-secondary {
+        background: #e2e8f0;
+        color: #0f172a;
+      }
+      .error {
+        margin-bottom: 4px;
+        color: #b91c1c;
+        font-size: 0.8rem;
+      }
+      @media (max-width: 640px) {
+        .app {
+          padding: 8px;
+        }
+        .message {
+          max-width: 100%;
+        }
+        .app-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <!-- React from CDN，不需要本地 Node 环境 -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script>
+      const e = React.createElement;
+
+      const MODELS = [
+        { id: "./models/Qwen3-VL-8B-Instruct-AWQ-4bit", label: "基座模型" },
+        { id: "finance-expert-a", label: "Expert A（宏观）" },
+        { id: "finance-expert-b", label: "Expert B（行业/个股）" }
+      ];
+
+      // 流式请求：逐 token 回调，返回完整内容（用于最终写入消息）
+      async function chatRequestStream(model, messages, onChunk) {
+        const resp = await fetch("/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model,
+            messages,
+            temperature: 0.7,
+            max_tokens: 1024,
+            stream: true
+          })
+        });
+        if (!resp.ok) {
+          const text = await resp.text();
+          throw new Error("HTTP " + resp.status + ": " + text);
+        }
+        const ct = (resp.headers.get("content-type") || "").toLowerCase();
+        if (!ct.includes("text/event-stream")) {
+          const text = await resp.text();
+          throw new Error(text || "上游未返回流式数据（content-type=" + ct + "）");
+        }
+        const reader = resp.body.getReader();
+        const decoder = new TextDecoder();
+        let full = "";
+        let buffer = "";
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              const raw = line.slice(6).trim();
+              if (raw === "[DONE]") continue;
+              try {
+                const data = JSON.parse(raw);
+                const delta = data.choices?.[0]?.delta?.content;
+                if (typeof delta === "string") {
+                  full += delta;
+                  if (onChunk) onChunk(full);
+                }
+              } catch (_) {}
+            }
+          }
+        }
+        if (buffer && buffer.startsWith("data: ")) {
+          const raw = buffer.slice(6).trim();
+          if (raw !== "[DONE]") {
+            try {
+              const data = JSON.parse(raw);
+              const delta = data.choices?.[0]?.delta?.content;
+              if (typeof delta === "string") {
+                full += delta;
+                if (onChunk) onChunk(full);
+              }
+            } catch (_) {}
+          }
+        }
+        return full;
+      }
+
+      function App() {
+        const [model, setModel] = React.useState("finance-expert-a");
+        const [input, setInput] = React.useState("");
+        const [messages, setMessages] = React.useState([]);
+        const [loading, setLoading] = React.useState(false);
+        const [error, setError] = React.useState(null);
+        const [imageDataUrl, setImageDataUrl] = React.useState(null);
+        const [imageName, setImageName] = React.useState(null);
+
+        function readFileAsDataUrl(file) {
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onerror = () => reject(new Error("读取图片失败"));
+            reader.onload = () => resolve(reader.result);
+            reader.readAsDataURL(file);
+          });
+        }
+
+        async function normalizeToJpegDataUrl(file) {
+          const src = await readFileAsDataUrl(file);
+          const img = new Image();
+          img.src = src;
+          await new Promise((resolve, reject) => {
+            img.onload = () => resolve();
+            img.onerror = () => reject(new Error("解析图片失败（可能格式不支持）"));
+          });
+
+          const maxSide = 1024;
+          const sw = img.naturalWidth || img.width;
+          const sh = img.naturalHeight || img.height;
+          const scale = Math.min(1, maxSide / Math.max(sw, sh));
+          const w = Math.max(1, Math.round(sw * scale));
+          const h = Math.max(1, Math.round(sh * scale));
+
+          const canvas = document.createElement("canvas");
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, w, h);
+
+          // 统一转成 JPEG，避免 vLLM 不支持 webp/heic 等格式导致 400
+          const jpegUrl = canvas.toDataURL("image/jpeg", 0.92);
+          const base = (file.name || "upload").replace(/\.[^.]+$/, "");
+          return { dataUrl: jpegUrl, name: base + ".jpg" };
+        }
+
+        function toApiMessage(m) {
+          if (m.role === "user" && m.imageDataUrl) {
+            const text = (m.content || "").trim() || "请描述这张图片。";
+            return {
+              role: "user",
+              content: [
+                { type: "text", text },
+                { type: "image_url", image_url: { url: m.imageDataUrl } }
+              ]
+            };
+          }
+          return { role: m.role, content: m.content || "" };
+        }
+
+        async function handleSubmit(event) {
+          event.preventDefault();
+          if ((!input.trim() && !imageDataUrl) || loading) return;
+
+          const userMsg = {
+            id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+            role: "user",
+            content: input,
+            model,
+            imageDataUrl,
+            imageName
+          };
+          const botId = crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + 1);
+          const botMsg = {
+            id: botId,
+            role: "assistant",
+            content: "",
+            model
+          };
+          setMessages((prev) => [...prev, userMsg, botMsg]);
+          setInput("");
+          setImageDataUrl(null);
+          setImageName(null);
+          setError(null);
+          setLoading(true);
+
+          try {
+            const historyForApi = [...messages, userMsg].map(toApiMessage);
+            await chatRequestStream(model, historyForApi, (content) => {
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === botId ? { ...m, content } : m
+                )
+              );
+            });
+          } catch (err) {
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === botId ? { ...m, content: "请求失败，请重试。" } : m
+              )
+            );
+            setError(err.message || String(err));
+          } finally {
+            setLoading(false);
+          }
+        }
+
+        function handleClear() {
+          setMessages([]);
+          setError(null);
+        }
+
+        return e(
+          "div",
+          { className: "app" },
+          e(
+            "header",
+            { className: "app-header" },
+            e(
+              "div",
+              null,
+              e("h1", null, "Qwen3-VL Finance Chat"),
+              e("p", null, "基于 vLLM，多专家（LoRA）金融助手")
+            ),
+            e(
+              "div",
+              { className: "model-select" },
+              e(
+                "label",
+                null,
+                "模型：",
+                e(
+                  "select",
+                  {
+                    value: model,
+                    onChange: (ev) => setModel(ev.target.value)
+                  },
+                  MODELS.map((m) =>
+                    e("option", { key: m.id, value: m.id }, m.label)
+                  )
+                )
+              ),
+              e(
+                "button",
+                { type: "button", onClick: handleClear },
+                "清空对话"
+              )
+            )
+          ),
+          e(
+            "main",
+            { className: "chat-container" },
+            e(
+              "div",
+              { className: "messages" },
+              messages.length === 0 &&
+                e(
+                  "div",
+                  { className: "empty-tip" },
+                  "选择一个模型，然后开始提问，例如：“请从宏观和行业两个角度分析 2024 年 A 股走势。”"
+                ),
+              messages.map((m) =>
+                e(
+                  "div",
+                  {
+                    key: m.id,
+                    className:
+                      "message " +
+                      (m.role === "user" ? "message-user" : "message-assistant")
+                  },
+                  e(
+                    "div",
+                    { className: "message-meta" },
+                    e(
+                      "span",
+                      { className: "message-role" },
+                      m.role === "user" ? "你" : "助手"
+                    ),
+                    m.model &&
+                      e(
+                        "span",
+                        { className: "message-model" },
+                        m.model === "finance-expert-a"
+                          ? "Expert A"
+                          : m.model === "finance-expert-b"
+                          ? "Expert B"
+                          : "基座"
+                      )
+                  ),
+                  e("div", { className: "message-content" }, m.content)
+                  ,
+                  m.imageDataUrl &&
+                    e("img", {
+                      className: "message-image",
+                      src: m.imageDataUrl,
+                      alt: m.imageName || "uploaded"
+                    })
+                )
+              )
+            )
+          ),
+          e(
+            "footer",
+            { className: "input-area" },
+            error &&
+              e("div", { className: "error" }, "请求出错：", error),
+            e(
+              "form",
+              {
+                onSubmit: handleSubmit
+              },
+              e(
+                "div",
+                { className: "input-attachments" },
+                e(
+                  "label",
+                  { className: "file-input" },
+                  "图片：",
+                  e("input", {
+                    type: "file",
+                    accept: "image/*",
+                    disabled: loading,
+                    onChange: async (ev) => {
+                      const file = ev.target.files && ev.target.files[0];
+                      if (!file) return;
+                      if (file.size > 8 * 1024 * 1024) {
+                        setError("图片太大了（> 8MB），请换一张更小的。");
+                        ev.target.value = "";
+                        return;
+                      }
+                      try {
+                        const out = await normalizeToJpegDataUrl(file);
+                        setImageDataUrl(out.dataUrl);
+                        setImageName(out.name);
+                      } catch (e) {
+                        setError(e.message || String(e));
+                      } finally {
+                        ev.target.value = "";
+                      }
+                    }
+                  })
+                ),
+                imageDataUrl &&
+                  e(
+                    "div",
+                    { className: "attach-preview" },
+                    e("img", { src: imageDataUrl, alt: imageName || "preview" }),
+                    e("div", { className: "attach-name" }, imageName || "已选择图片"),
+                    e(
+                      "button",
+                      {
+                        type: "button",
+                        className: "btn-secondary",
+                        onClick: () => {
+                          setImageDataUrl(null);
+                          setImageName(null);
+                        }
+                      },
+                      "移除"
+                    )
+                  )
+              ),
+              e("textarea", {
+                rows: 3,
+                placeholder: "输入你的问题，按 Ctrl+Enter 发送...",
+                value: input,
+                onChange: (ev) => setInput(ev.target.value),
+                onKeyDown: (ev) => {
+                  if (
+                    ev.key === "Enter" &&
+                    (ev.ctrlKey || ev.metaKey)
+                  ) {
+                    handleSubmit(ev);
+                  }
+                }
+              }),
+              e(
+                "div",
+                { className: "input-actions" },
+                e(
+                  "span",
+                  { className: "hint" },
+                  "当前模型：",
+                  (MODELS.find((m) => m.id === model) || MODELS[0]).label
+                ),
+                e(
+                  "button",
+                  { type: "submit", disabled: loading },
+                  loading ? "生成中..." : "发送"
+                )
+              )
+            )
+          )
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById("root")).render(
+        React.createElement(App)
+      );
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,23 @@
+# 忽略常见大模型权重文件
+*.bin
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+*.onnx
+
+# 忽略常见大模型目录（如果你知道具体目录名也可以单独写）
+models/
+checkpoints/
+weights/
+logs/
+data/
+datasets/
+
+# Python / Node 等常规忽略
+__pycache__/
+*.pyc
+.env
+venv/
+.env.*/
+node_modules/
