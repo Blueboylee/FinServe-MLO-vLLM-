@@ -1,11 +1,16 @@
 """
-方案一（Python 版）：vLLM 多 LoRA 动态加载服务
+方案一（Python 版）：vLLM 多 LoRA 动态加载服务 + LoRA 亲和调度
 
 通过 Python API 启动 vLLM 引擎，支持动态切换 Expert-A / Expert-B。
 适用于需要更灵活控制推理流程的场景。
+
+LoRA-Aware Scheduler Plugin 会通过 vLLM general_plugins 自动加载，
+无需在此文件中手动调用。只需确保 finserve-lora-scheduler 已安装：
+  pip install -e ../finserve-lora-scheduler
 """
 
 import json
+import os
 from pathlib import Path
 
 from vllm import LLM, SamplingParams
@@ -27,6 +32,10 @@ def main():
     lora_rank = detect_lora_rank(EXPERT_A_PATH)
     print(f"检测到 LoRA rank: {lora_rank}")
 
+    lora_reorder = os.environ.get("FINSERVE_LORA_REORDER", "1")
+    lora_max_wait = os.environ.get("FINSERVE_LORA_MAX_WAIT_SEC", "10")
+    print(f"LoRA 亲和调度: reorder={lora_reorder}, max_wait={lora_max_wait}s")
+
     llm = LLM(
         model=BASE_MODEL,
         quantization="awq",
@@ -37,6 +46,9 @@ def main():
         max_model_len=4096,
         gpu_memory_utilization=0.90,
         trust_remote_code=True,
+        enable_chunked_prefill=True,
+        max_num_batched_tokens=512,
+        enable_prefix_caching=True,
         limit_mm_per_prompt={"image": 4, "video": 1},
     )
 

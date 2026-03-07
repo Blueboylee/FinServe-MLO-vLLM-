@@ -1,0 +1,11 @@
+Metadata-Version: 2.4
+Name: finserve-lora-scheduler
+Version: 0.1.0
+Summary: LoRA-Aware Chunked Prefill Scheduler Plugin for vLLM — reduces adapter switching overhead in Multi-LoRA serving
+Author: FinServe-MLO
+Requires-Python: >=3.10
+Requires-Dist: vllm>=0.8.0
+Dynamic: author
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary

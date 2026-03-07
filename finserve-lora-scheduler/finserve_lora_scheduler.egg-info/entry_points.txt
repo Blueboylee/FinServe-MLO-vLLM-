@@ -1,0 +1,2 @@
+[vllm.general_plugins]
+finserve_lora_scheduler = finserve_lora_scheduler:register

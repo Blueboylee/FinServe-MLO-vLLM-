@@ -1,8 +1,9 @@
 #!/bin/bash
 # ============================================
-#  vLLM 多 LoRA 服务 (PD 优化版)
+#  vLLM 多 LoRA 服务 (PD 优化版 + LoRA 亲和调度)
 #  支持: 单实例 Chunked Prefill / PD 分离架构
 #  解决专家长 Prefill 对基座请求的队头阻塞
+#  + LoRA-Aware Scheduler Plugin 减少 adapter 切换
 # ============================================
 
 MODEL_DIR="./models"
@@ -28,14 +29,29 @@ MAX_NUM_BATCHED_TOKENS=512
 # Expert-A 的银行交易记录格式、Expert-B 的新闻分析格式可大幅复用
 ENABLE_PREFIX_CACHING=true
 
+# LoRA-Aware Scheduler Plugin: 对 waiting queue 按 adapter 亲和性重排,
+# 使同一 batch 优先聚合相同 LoRA 的请求, 减少权重切换开销
+export FINSERVE_LORA_REORDER="${FINSERVE_LORA_REORDER:-1}"
+export FINSERVE_LORA_MAX_WAIT_SEC="${FINSERVE_LORA_MAX_WAIT_SEC:-10}"
+export FINSERVE_LORA_GROUP_CAP="${FINSERVE_LORA_GROUP_CAP:-0}"
+
 # PD 分离配置 (仅 DEPLOY_MODE=disagg 时生效)
 PREFILL_GPU="${PREFILL_GPU:-0}"
 DECODE_GPU="${DECODE_GPU:-1}"
 PREFILL_PORT=8000
 DECODE_PORT=8001
 
+# ---------- 安装 LoRA Scheduler Plugin (仅首次) ----------
+PLUGIN_DIR="$(cd "$(dirname "$0")/../finserve-lora-scheduler" 2>/dev/null && pwd)"
+if [ -d "$PLUGIN_DIR" ]; then
+    if ! python3 -c "import finserve_lora_scheduler" 2>/dev/null; then
+        echo "[Plugin] 首次安装 finserve-lora-scheduler..."
+        pip install -e "$PLUGIN_DIR" -q
+    fi
+fi
+
 echo "============================================"
-echo "  vLLM 多 LoRA 服务 [PD 优化版]"
+echo "  vLLM 多 LoRA 服务 [PD 优化 + LoRA 亲和调度]"
 echo "============================================"
 echo "  基座模型:        $BASE_MODEL"
 echo "  Expert-A:        $EXPERT_A"
@@ -43,6 +59,7 @@ echo "  Expert-B:        $EXPERT_B"
 echo "  部署模式:        $DEPLOY_MODE"
 echo "  Chunked Prefill: $ENABLE_CHUNKED_PREFILL (chunk=$MAX_NUM_BATCHED_TOKENS)"
 echo "  Prefix Caching:  $ENABLE_PREFIX_CACHING"
+echo "  LoRA Reorder:    $FINSERVE_LORA_REORDER (max_wait=${FINSERVE_LORA_MAX_WAIT_SEC}s)"
 echo "============================================"
 
 # 检查 LoRA adapter_config.json 中的 rank，并映射到 vLLM 支持的 max-lora-rank
