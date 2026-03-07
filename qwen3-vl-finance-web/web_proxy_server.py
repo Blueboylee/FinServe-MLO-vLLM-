@@ -1,7 +1,8 @@
 import argparse
+import collections
 import json
 import time
-from collections import Counter, deque
+from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Deque, Dict, List, Optional
@@ -17,6 +18,65 @@ from fastapi.responses import (
     StreamingResponse,
 )
 
+# Prometheus 指标（可选依赖）
+try:
+    from prometheus_client import (
+        REGISTRY,
+        Counter,
+        Gauge,
+        Histogram,
+        generate_latest,
+        CONTENT_TYPE_LATEST,
+    )
+    PROMETHEUS_AVAILABLE = True
+except ImportError:
+    PROMETHEUS_AVAILABLE = False
+    REGISTRY = None
+    generate_latest = None
+    CONTENT_TYPE_LATEST = None
+
+if PROMETHEUS_AVAILABLE:
+    FINSERVE_REQUEST_DURATION = Histogram(
+        "finserve_request_duration_seconds",
+        "E2E request duration in seconds",
+        buckets=(0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0, 60.0),
+    )
+    FINSERVE_TTFT = Histogram(
+        "finserve_ttft_seconds",
+        "Time to first token in seconds",
+        buckets=(0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0),
+    )
+    FINSERVE_TPOT = Histogram(
+        "finserve_tpot_seconds",
+        "Time per output token in seconds",
+        buckets=(0.001, 0.002, 0.005, 0.01, 0.025, 0.05, 0.1, 0.2, 0.5),
+    )
+    FINSERVE_REQUESTS_TOTAL = Counter(
+        "finserve_requests_total",
+        "Total chat completion requests",
+        ["status"],
+    )
+    FINSERVE_TOKENS_TOTAL = Counter(
+        "finserve_tokens_total",
+        "Total tokens (prompt + completion)",
+    )
+    FINSERVE_REQUESTS_IN_FLIGHT = Gauge(
+        "finserve_requests_in_flight",
+        "Number of requests currently being processed",
+    )
+    FINSERVE_KV_CACHE_USAGE = Gauge(
+        "finserve_kv_cache_usage_percent",
+        "vLLM KV cache usage percent (0-100)",
+    )
+else:
+    FINSERVE_REQUEST_DURATION = None
+    FINSERVE_TTFT = None
+    FINSERVE_TPOT = None
+    FINSERVE_REQUESTS_TOTAL = None
+    FINSERVE_TOKENS_TOTAL = None
+    FINSERVE_REQUESTS_IN_FLIGHT = None
+    FINSERVE_KV_CACHE_USAGE = None
+
 
 @dataclass
 class RequestRecord:
@@ -28,6 +88,24 @@ class RequestRecord:
     prompt_tokens: int
     completion_tokens: int
     finish_reason: Optional[str]
+    ttft_ms: Optional[float] = None  # Time To First Token (ms)
+    tpot_ms: Optional[float] = None  # Time Per Output Token (ms)
+
+
+def _prometheus_observe_record(rec: RequestRecord) -> None:
+    """将一次请求记录写入 Prometheus（若已安装 prometheus_client）。"""
+    if not PROMETHEUS_AVAILABLE:
+        return
+    duration_sec = rec.ts_end - rec.ts_start
+    FINSERVE_REQUEST_DURATION.observe(duration_sec)
+    status = "success" if rec.success else "error"
+    FINSERVE_REQUESTS_TOTAL.labels(status=status).inc()
+    if rec.total_tokens and rec.total_tokens > 0:
+        FINSERVE_TOKENS_TOTAL.inc(rec.total_tokens)
+    if rec.ttft_ms is not None:
+        FINSERVE_TTFT.observe(rec.ttft_ms / 1000.0)
+    if rec.tpot_ms is not None:
+        FINSERVE_TPOT.observe(rec.tpot_ms / 1000.0)
 
 
 class MetricsStore:
@@ -54,6 +132,39 @@ class MetricsStore:
         now = time.time()
         while self.records and now - self.records[0].ts_start > self.window_sec:
             self.records.popleft()
+
+    def _latency_with_ttft_tpot(
+        self, recs: list, lat_ms: list, pct
+    ) -> Dict:
+        out = {
+            "avg_ms": sum(lat_ms) / len(lat_ms),
+            "p50_ms": pct(0.5),
+            "p95_ms": pct(0.95),
+            "p99_ms": pct(0.99),
+        }
+        ttft_recs = [r for r in recs if r.ttft_ms is not None]
+        tpot_recs = [r for r in recs if r.tpot_ms is not None]
+        if ttft_recs:
+            ttft_sorted = sorted(r.ttft_ms for r in ttft_recs)
+            k = lambda p: ttft_sorted[max(0, min(len(ttft_sorted) - 1, int(len(ttft_sorted) * p)))]
+            out["ttft_avg_ms"] = sum(ttft_sorted) / len(ttft_sorted)
+            out["ttft_p95_ms"] = k(0.95)
+            out["ttft_p99_ms"] = k(0.99)
+        else:
+            out["ttft_avg_ms"] = None
+            out["ttft_p95_ms"] = None
+            out["ttft_p99_ms"] = None
+        if tpot_recs:
+            tpot_sorted = sorted(r.tpot_ms for r in tpot_recs)
+            k = lambda p: tpot_sorted[max(0, min(len(tpot_sorted) - 1, int(len(tpot_sorted) * p)))]
+            out["tpot_avg_ms"] = sum(tpot_sorted) / len(tpot_sorted)
+            out["tpot_p95_ms"] = k(0.95)
+            out["tpot_p99_ms"] = k(0.99)
+        else:
+            out["tpot_avg_ms"] = None
+            out["tpot_p95_ms"] = None
+            out["tpot_p99_ms"] = None
+        return out
 
     def snapshot(self) -> Dict:
         self._trim()
@@ -86,8 +197,8 @@ class MetricsStore:
         total_time = sum(latencies)
         tokens_per_s = total_tokens / total_time if total_time > 0 else 0.0
 
-        by_status = Counter(r.status_code for r in recs)
-        finish_counter = Counter(r.finish_reason or "unknown" for r in recs)
+        by_status = collections.Counter(r.status_code for r in recs)
+        finish_counter = collections.Counter(r.finish_reason or "unknown" for r in recs)
 
         success_recent = sum(1 for r in recs if r.success)
         error_recent = len(recs) - success_recent
@@ -103,12 +214,7 @@ class MetricsStore:
                 "success": self.total_success,
                 "error": self.total_error,
             },
-            "latency": {
-                "avg_ms": sum(lat_ms) / len(lat_ms),
-                "p50_ms": pct(0.5),
-                "p95_ms": pct(0.95),
-                "p99_ms": pct(0.99),
-            },
+            "latency": self._latency_with_ttft_tpot(recs, lat_ms, pct),
             "throughput": {
                 "total_tokens": total_tokens,
                 "tokens_per_s": tokens_per_s,
@@ -281,6 +387,40 @@ def create_app(static_dir: Path, upstream: str) -> FastAPI:
     async def health():
         return {"ok": True, "upstream": upstream}
 
+    @app.get("/metrics")
+    async def prometheus_metrics():
+        """Prometheus 拉取端点；同时从 vLLM 拉取 KV cache 并写入 Gauge。"""
+        if not PROMETHEUS_AVAILABLE:
+            return PlainTextResponse(
+                "Prometheus client not installed. pip install prometheus_client",
+                status_code=501,
+            )
+        kv_usage_percent: Optional[float] = None
+        try:
+            async with httpx.AsyncClient(timeout=2.0) as client:
+                r = await client.get(f"{upstream}/metrics")
+            if r.status_code == 200:
+                for line in r.text.splitlines():
+                    if not line or line.startswith("#"):
+                        continue
+                    if "kv_cache_usage_perc" in line or "gpu_cache_usage_perc" in line:
+                        parts = line.split()
+                        if len(parts) >= 2:
+                            try:
+                                v = float(parts[-1])
+                                if kv_usage_percent is None or v * 100 > kv_usage_percent:
+                                    kv_usage_percent = v * 100.0
+                            except ValueError:
+                                pass
+        except Exception:
+            pass
+        if kv_usage_percent is not None:
+            FINSERVE_KV_CACHE_USAGE.set(kv_usage_percent)
+        return Response(
+            content=generate_latest(REGISTRY),
+            media_type=CONTENT_TYPE_LATEST,
+        )
+
     # 反向代理 vLLM OpenAI 接口（同源调用，避免浏览器 CORS 问题）
     @app.api_route(
         "/v1/{path:path}",
@@ -325,7 +465,10 @@ def create_app(static_dir: Path, upstream: str) -> FastAPI:
                 "upgrade",
             }
 
+            stream_ts_start = time.time()
             metrics.active_requests += 1
+            if PROMETHEUS_AVAILABLE:
+                FINSERVE_REQUESTS_IN_FLIGHT.inc()
             client = httpx.AsyncClient(timeout=600)
             upstream_resp: Optional[httpx.Response] = None
             try:
@@ -343,14 +486,90 @@ def create_app(static_dir: Path, upstream: str) -> FastAPI:
                     if k.lower() not in excluded
                 }
 
+                def parse_sse_line(line: bytes) -> tuple:
+                    """
+                    解析一行 data: {...}：
+                    返回 (usage.completion_tokens, 1若本行有 delta content 否则 0)。
+                    """
+                    if not line.startswith(b"data: "):
+                        return 0, 0
+                    raw = line[6:].strip()
+                    if raw == b"[DONE]":
+                        return 0, 0
+                    usage_val = 0
+                    has_delta = 0
+                    try:
+                        data = json.loads(raw.decode("utf-8"))
+                        usage = data.get("usage") or {}
+                        usage_val = int(usage.get("completion_tokens") or 0)
+                        choices = data.get("choices") or []
+                        if choices:
+                            delta = choices[0].get("delta") or {}
+                            if delta.get("content"):
+                                has_delta = 1
+                    except Exception:
+                        pass
+                    return usage_val, has_delta
+
                 async def stream_chunks():
+                    buffer = b""
+                    ttft_ms: Optional[float] = None
+                    completion_tokens = 0
+                    delta_chunk_count = 0
+                    first_chunk_ts: Optional[float] = None
+                    status_code = upstream_resp.status_code
                     try:
                         async for chunk in upstream_resp.aiter_bytes():
                             yield chunk
+                            if ttft_ms is None and chunk:
+                                first_chunk_ts = time.time()
+                                ttft_ms = (first_chunk_ts - stream_ts_start) * 1000.0
+                            buffer += chunk
+                            while b"\n" in buffer:
+                                line, buffer = buffer.split(b"\n", 1)
+                                line = line.strip()
+                                if line:
+                                    u, d = parse_sse_line(line)
+                                    if u > 0:
+                                        completion_tokens = u
+                                    delta_chunk_count += d
+                        if buffer:
+                            for part in buffer.split(b"\n"):
+                                part = part.strip()
+                                if part:
+                                    u, d = parse_sse_line(part)
+                                    if u > 0:
+                                        completion_tokens = u
+                                    delta_chunk_count += d
+                        # 若 vLLM 未在流中带 usage，用「有内容的 delta 块数」近似 token 数
+                        if completion_tokens <= 0 and delta_chunk_count > 0:
+                            completion_tokens = delta_chunk_count
                     finally:
                         await upstream_resp.aclose()
                         await client.aclose()
                         metrics.active_requests -= 1
+                        if PROMETHEUS_AVAILABLE:
+                            FINSERVE_REQUESTS_IN_FLIGHT.dec()
+                        ts_end = time.time()
+                        success = 200 <= status_code < 300
+                        tpot_ms = None
+                        effective_tokens = completion_tokens if completion_tokens > 0 else delta_chunk_count
+                        if first_chunk_ts is not None and effective_tokens > 0:
+                            tpot_ms = (ts_end - first_chunk_ts) * 1000.0 / effective_tokens
+                        rec = RequestRecord(
+                            ts_start=stream_ts_start,
+                            ts_end=ts_end,
+                            status_code=status_code,
+                            success=success,
+                            total_tokens=-1,
+                            prompt_tokens=-1,
+                            completion_tokens=completion_tokens,
+                            finish_reason=None,
+                            ttft_ms=ttft_ms,
+                            tpot_ms=tpot_ms,
+                        )
+                        metrics.add_record(rec)
+                        _prometheus_observe_record(rec)
 
                 return StreamingResponse(
                     stream_chunks(),
@@ -362,10 +581,14 @@ def create_app(static_dir: Path, upstream: str) -> FastAPI:
                     await upstream_resp.aclose()
                 await client.aclose()
                 metrics.active_requests -= 1
+                if PROMETHEUS_AVAILABLE:
+                    FINSERVE_REQUESTS_IN_FLIGHT.dec()
                 raise
 
         ts_start = time.time()
         metrics.active_requests += 1
+        if PROMETHEUS_AVAILABLE:
+            FINSERVE_REQUESTS_IN_FLIGHT.inc()
         try:
             async with httpx.AsyncClient(timeout=600) as client:
                 resp = await client.request(
@@ -378,6 +601,8 @@ def create_app(static_dir: Path, upstream: str) -> FastAPI:
             ts_end = time.time()
         finally:
             metrics.active_requests -= 1
+            if PROMETHEUS_AVAILABLE:
+                FINSERVE_REQUESTS_IN_FLIGHT.dec()
 
         total_tokens = -1
         prompt_tokens = -1
@@ -399,6 +624,9 @@ def create_app(static_dir: Path, upstream: str) -> FastAPI:
                 if choices:
                     finish_reason = choices[0].get("finish_reason")
 
+        tpot_ms = None
+        if completion_tokens and completion_tokens > 0 and (ts_end - ts_start) > 0:
+            tpot_ms = (ts_end - ts_start) * 1000.0 / completion_tokens
         rec = RequestRecord(
             ts_start=ts_start,
             ts_end=ts_end,
@@ -408,8 +636,11 @@ def create_app(static_dir: Path, upstream: str) -> FastAPI:
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
             finish_reason=finish_reason,
+            ttft_ms=None,
+            tpot_ms=tpot_ms,
         )
         metrics.add_record(rec)
+        _prometheus_observe_record(rec)
 
         excluded = {
             "connection", "keep-alive", "proxy-authenticate",
@@ -428,7 +659,7 @@ def main():
         "--port",
         type=int,
         default=8188,
-        help="用平台已映射的内网端口，比如 8188",
+        help="用「端口转发」里业务端口的内网端口，如 8188（对应公网 11273）或 7860（对应公网 11274）",
     )
     parser.add_argument("--static-dir", default=str(Path(__file__).parent))
     parser.add_argument(
@@ -446,5 +677,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 

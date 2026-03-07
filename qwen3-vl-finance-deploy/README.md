@@ -118,13 +118,13 @@ Qwen3-VL 系列模型在 vLLM 中使用 LoRA 时存在已知 bug（[vllm#28186](
 
 ## 可选：做一个 ChatGPT 风格网页
 
-很多云平台（你截图的“端口转发”面板）**只会把固定的内网端口映射到公网端口**，比如内网 `8188` → 公网 `10253`。这种情况下直接用 `python -m http.server 5173` 在公网是打不开的。
+很多云平台（你截图的“端口转发”面板）**只会把固定的内网端口映射到公网端口**，例如内网 `8188` → 公网 `11273`。这种情况下直接用 `python -m http.server 5173` 在公网是打不开的。
 
 这里提供一个同源反向代理方案：
 
 - 页面：`~/下载/qwen3-vl-finance-web/static-chat.html`
 - 代理服务：`~/下载/qwen3-vl-finance-web/web_proxy_server.py`
-- 浏览器访问：通过你平台给的公网域名与公网端口（例如 `http://jq1.9gpu.com:10253`）
+- 浏览器访问：通过你平台「端口转发」里业务端口对应的访问地址（例如内网 8188 对应 `http://jq1.9gpu.com:11273`）
 
 ### 启动步骤
 
@@ -136,17 +136,21 @@ cd ~/下载/qwen3-vl-finance-deploy
 bash serve_multi_lora.sh
 ```
 
-2) 新开一个终端，启动网页 + 反向代理（内网端口用平台映射的那个，比如 8188）：
+2) 新开一个终端，启动网页 + 反向代理。**内网端口必须和「端口转发」里业务端口的内网端口一致**（例如 8188 或 7860）：
 
 ```bash
 conda activate qwen3-vllm
 pip install -U fastapi uvicorn httpx
 
 cd ~/下载/qwen3-vl-finance-web
+# 若端口转发里是「内网 8188 → 公网 11273」，用：
 python web_proxy_server.py --port 8188
+# 若端口转发里是「内网 7860 → 公网 11274」，用：
+# python web_proxy_server.py --port 7860
 ```
 
-3) 浏览器打开平台提供的公网地址（示例）：
+3) 浏览器打开「端口转发」里该业务端口的访问地址，例如：
 
-- `http://jq1.9gpu.com:10253/`
+- 内网 8188 时：`http://jq1.9gpu.com:11273/`
+- 内网 7860 时：`http://jq1.9gpu.com:11274/`
 

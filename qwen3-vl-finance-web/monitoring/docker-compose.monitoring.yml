@@ -1,0 +1,44 @@
+# Prometheus + Grafana，用于专业展示 FinServe 指标
+# 使用：在 proxy 所在机器执行
+#   docker compose -f docker-compose.monitoring.yml up -d
+# Grafana: http://localhost:3000  默认 admin / admin
+# Prometheus: http://localhost:9090
+# 注意：prometheus.yml 中 targets 需指向可访问的 proxy 地址（本机 proxy 用 127.0.0.1:8188 时，Prometheus 用 host 网络才能抓到）
+
+version: "3.8"
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: finserve-prometheus
+    network_mode: host
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+      - "--web.listen-address=0.0.0.0:9090"
+
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: finserve-grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_HTTP_PORT=3000
+      - GF_INSTALL_PLUGINS=
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    ports:
+      - "3000:3000"
+    # 若 Prometheus 用 host 网络，Grafana 需能访问本机 9090
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  prometheus_data: {}
+  grafana_data: {}

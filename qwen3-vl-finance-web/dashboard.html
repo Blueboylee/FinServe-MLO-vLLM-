@@ -172,11 +172,39 @@
           <div class="card-main"><span id="lat-p99">–</span> <span class="small">ms</span></div>
           <div class="card-sub">极端长尾 (99%)</div>
         </div>
+        <div class="card">
+          <div class="card-title">TTFT (Avg)</div>
+          <div class="card-main"><span id="ttft-avg">–</span> <span class="small">ms</span></div>
+          <div class="card-sub">首 token 时间（流式）</div>
+        </div>
+        <div class="card">
+          <div class="card-title">TTFT (P95)</div>
+          <div class="card-main"><span id="ttft-p95">–</span> <span class="small">ms</span></div>
+          <div class="card-sub">首 token 长尾</div>
+        </div>
+        <div class="card">
+          <div class="card-title">TPOT (Avg)</div>
+          <div class="card-main"><span id="tpot-avg">–</span> <span class="small">ms/token</span></div>
+          <div class="card-sub">每输出 token 耗时</div>
+        </div>
+        <div class="card">
+          <div class="card-title">TPOT (P95)</div>
+          <div class="card-main"><span id="tpot-p95">–</span> <span class="small">ms/token</span></div>
+          <div class="card-sub">每 token 长尾</div>
+        </div>
       </div>
       <div class="chart-row">
         <div class="chart-card" style="grid-column: 1 / -1;">
           <div class="card-title">Latency 趋势 (Avg / P95 / P99)</div>
           <div class="chart-container"><canvas id="chart-latency"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="card-title">TTFT 趋势 (Avg / P95)</div>
+          <div class="chart-container"><canvas id="chart-ttft"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="card-title">TPOT 趋势 (Avg / P95) ms/token</div>
+          <div class="chart-container"><canvas id="chart-tpot"></canvas></div>
         </div>
       </div>
 
@@ -266,8 +294,7 @@
       </div>
 
       <div class="small" style="margin-top: 12px; color: #94a3b8;">
-        说明：目前 Dashboard 只统计通过 Web Proxy 的 <span class="mono">/v1/chat/completions</span>
-        请求。TTFT / TPOT / GPU 利用率等更底层指标需要接入 Prometheus 或 GPU 监控，如需我可以之后帮你接入。
+        说明：TTFT（Time To First Token）、TPOT（Time Per Output Token）由 Web Proxy 在流式/非流式请求上采样计算并展示。
       </div>
     </div>
 
@@ -276,6 +303,8 @@
       const history = {
         labels: [],
         latAvg: [], latP95: [], latP99: [],
+        ttftAvg: [], ttftP95: [],
+        tpotAvg: [], tpotP95: [],
         rps: [], tps: [],
         successRate: [], errorRate: [],
         kvUsage: []
@@ -311,7 +340,7 @@
         }
       };
 
-      let chartLatency, chartRps, chartTps, chartKv, chartReliability;
+      let chartLatency, chartRps, chartTps, chartKv, chartReliability, chartTtft, chartTpot;
 
       function initCharts() {
         const ctxLat = document.getElementById("chart-latency").getContext("2d");
@@ -376,6 +405,32 @@
           },
           options: chartOptionsPercent
         });
+
+        const ctxTtft = document.getElementById("chart-ttft").getContext("2d");
+        chartTtft = new Chart(ctxTtft, {
+          type: "line",
+          data: {
+            labels: history.labels,
+            datasets: [
+              { label: "TTFT Avg (ms)", data: history.ttftAvg, borderColor: "#06b6d4", backgroundColor: "rgba(6,182,212,0.1)", fill: true, tension: 0.3 },
+              { label: "TTFT P95 (ms)", data: history.ttftP95, borderColor: "#0891b2", backgroundColor: "rgba(8,145,178,0.05)", fill: true, tension: 0.3 }
+            ]
+          },
+          options: chartOptions
+        });
+
+        const ctxTpot = document.getElementById("chart-tpot").getContext("2d");
+        chartTpot = new Chart(ctxTpot, {
+          type: "line",
+          data: {
+            labels: history.labels,
+            datasets: [
+              { label: "TPOT Avg (ms/tok)", data: history.tpotAvg, borderColor: "#a855f7", backgroundColor: "rgba(168,85,247,0.1)", fill: true, tension: 0.3 },
+              { label: "TPOT P95 (ms/tok)", data: history.tpotP95, borderColor: "#9333ea", backgroundColor: "rgba(147,51,234,0.05)", fill: true, tension: 0.3 }
+            ]
+          },
+          options: chartOptions
+        });
       }
 
       function pushHistory(m) {
@@ -384,6 +439,8 @@
         if (history.labels.length > MAX_POINTS) {
           history.labels.shift();
           history.latAvg.shift(); history.latP95.shift(); history.latP99.shift();
+          history.ttftAvg.shift(); history.ttftP95.shift();
+          history.tpotAvg.shift(); history.tpotP95.shift();
           history.rps.shift(); history.tps.shift();
           history.successRate.shift(); history.errorRate.shift();
           history.kvUsage.shift();
@@ -393,6 +450,10 @@
         history.latAvg.push(lat.avg_ms != null && !isNaN(lat.avg_ms) ? lat.avg_ms : null);
         history.latP95.push(lat.p95_ms != null && !isNaN(lat.p95_ms) ? lat.p95_ms : null);
         history.latP99.push(lat.p99_ms != null && !isNaN(lat.p99_ms) ? lat.p99_ms : null);
+        history.ttftAvg.push(lat.ttft_avg_ms != null && !isNaN(lat.ttft_avg_ms) ? lat.ttft_avg_ms : null);
+        history.ttftP95.push(lat.ttft_p95_ms != null && !isNaN(lat.ttft_p95_ms) ? lat.ttft_p95_ms : null);
+        history.tpotAvg.push(lat.tpot_avg_ms != null && !isNaN(lat.tpot_avg_ms) ? lat.tpot_avg_ms : null);
+        history.tpotP95.push(lat.tpot_p95_ms != null && !isNaN(lat.tpot_p95_ms) ? lat.tpot_p95_ms : null);
 
         const win = m.window_sec || 1;
         const rps = m.requests?.recent_count ? m.requests.recent_count / win : 0;
@@ -412,6 +473,8 @@
         chartTps?.update("none");
         chartKv?.update("none");
         chartReliability?.update("none");
+        chartTtft?.update("none");
+        chartTpot?.update("none");
       }
 
       async function fetchMetrics() {
@@ -442,6 +505,10 @@
           document.getElementById("lat-avg").textContent = fmt(lat.avg_ms);
           document.getElementById("lat-p95").textContent = fmt(lat.p95_ms);
           document.getElementById("lat-p99").textContent = fmt(lat.p99_ms);
+          document.getElementById("ttft-avg").textContent = fmt(lat.ttft_avg_ms);
+          document.getElementById("ttft-p95").textContent = fmt(lat.ttft_p95_ms);
+          document.getElementById("tpot-avg").textContent = fmt(lat.tpot_avg_ms);
+          document.getElementById("tpot-p95").textContent = fmt(lat.tpot_p95_ms);
 
           const thr = m.throughput || {};
           const win = m.window_sec || 1;
