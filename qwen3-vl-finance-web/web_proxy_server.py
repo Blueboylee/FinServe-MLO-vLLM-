@@ -1,4 +1,5 @@
 import argparse
+import asyncio
 import collections
 import json
 import time
@@ -68,6 +69,14 @@ if PROMETHEUS_AVAILABLE:
         "finserve_kv_cache_usage_percent",
         "vLLM KV cache usage percent (0-100)",
     )
+    FINSERVE_EXPERT_QUEUE_DEPTH = Gauge(
+        "finserve_expert_queue_depth",
+        "Expert requests waiting in priority scheduler",
+    )
+    FINSERVE_EXPERT_ACTIVE = Gauge(
+        "finserve_expert_active",
+        "Expert requests currently being processed",
+    )
 else:
     FINSERVE_REQUEST_DURATION = None
     FINSERVE_TTFT = None
@@ -76,6 +85,8 @@ else:
     FINSERVE_TOKENS_TOTAL = None
     FINSERVE_REQUESTS_IN_FLIGHT = None
     FINSERVE_KV_CACHE_USAGE = None
+    FINSERVE_EXPERT_QUEUE_DEPTH = None
+    FINSERVE_EXPERT_ACTIVE = None
 
 
 @dataclass
@@ -228,6 +239,55 @@ class MetricsStore:
         }
 
 
+class RequestPriorityScheduler:
+    """
+    解决 Expert 长 Prefill 导致的队头阻塞 (Head-of-Line Blocking):
+
+    - Expert 请求 (2500~3000 token prefill) 经过信号量限制并发数,
+      防止多个 Expert 同时 Prefill 挤占全部 GPU 算力。
+    - Base 请求 (短输入) 走快速通道, 完全不受 Expert 排队影响。
+    - 配合 vLLM Chunked Prefill: 即使 Expert 正在处理, 其 Prefill
+      被拆为小块, Decode 步骤可以在块间隙执行, Base 请求得以穿插。
+    """
+
+    def __init__(self, max_expert_concurrency: int = 2):
+        self._expert_sem = asyncio.Semaphore(max_expert_concurrency)
+        self._expert_waiting = 0
+        self._expert_active = 0
+        self._base_active = 0
+
+    async def acquire_expert(self) -> None:
+        self._expert_waiting += 1
+        if PROMETHEUS_AVAILABLE:
+            FINSERVE_EXPERT_QUEUE_DEPTH.set(self._expert_waiting)
+        await self._expert_sem.acquire()
+        self._expert_waiting -= 1
+        self._expert_active += 1
+        if PROMETHEUS_AVAILABLE:
+            FINSERVE_EXPERT_QUEUE_DEPTH.set(self._expert_waiting)
+            FINSERVE_EXPERT_ACTIVE.set(self._expert_active)
+
+    def release_expert(self) -> None:
+        self._expert_active -= 1
+        self._expert_sem.release()
+        if PROMETHEUS_AVAILABLE:
+            FINSERVE_EXPERT_ACTIVE.set(self._expert_active)
+
+    def inc_base(self) -> None:
+        self._base_active += 1
+
+    def dec_base(self) -> None:
+        self._base_active -= 1
+
+    @property
+    def stats(self) -> Dict:
+        return {
+            "expert_waiting": self._expert_waiting,
+            "expert_active": self._expert_active,
+            "base_active": self._base_active,
+        }
+
+
 def _extract_text_from_messages(messages) -> str:
     """从 OpenAI Chat messages 中提取所有用户文本，支持多模态 content[]."""
     chunks: List[str] = []
@@ -322,12 +382,21 @@ def route_model(messages: List[Dict]) -> str:
     return "finance-expert-a"
 
 
-def create_app(static_dir: Path, upstream: str) -> FastAPI:
+def create_app(
+    static_dir: Path,
+    upstream: str,
+    upstream_expert: Optional[str] = None,
+    upstream_base: Optional[str] = None,
+    max_expert_concurrency: int = 2,
+) -> FastAPI:
     app = FastAPI()
 
     static_file = static_dir / "static-chat.html"
     dashboard_file = static_dir / "dashboard.html"
     metrics = MetricsStore(window_sec=300)
+    scheduler = RequestPriorityScheduler(max_expert_concurrency)
+
+    pd_disagg = bool(upstream_expert and upstream_base)
 
     @app.get("/")
     async def root():
@@ -381,6 +450,8 @@ def create_app(static_dir: Path, upstream: str) -> FastAPI:
             kv_usage_percent = None
 
         snap["kv_cache"] = {"usage_percent": kv_usage_percent}
+        snap["scheduler"] = scheduler.stats
+        snap["pd_disagg"] = pd_disagg
         return JSONResponse(snap)
 
     @app.get("/health")
@@ -432,7 +503,8 @@ def create_app(static_dir: Path, upstream: str) -> FastAPI:
         headers.pop("host", None)
 
         body = await request.body()
-        # 如果前端传入 model=auto，则根据用户问题自动路由到 Expert-A / Expert-B / 基座
+        is_expert_request = False
+
         if path.startswith("chat/completions") or path == "chat/completions":
             try:
                 payload = json.loads(body or b"{}")
@@ -444,6 +516,13 @@ def create_app(static_dir: Path, upstream: str) -> FastAPI:
                     routed = route_model(payload.get("messages") or [])
                     payload["model"] = routed
                     body = json.dumps(payload).encode("utf-8")
+                resolved = payload.get("model", "")
+                is_expert_request = isinstance(resolved, str) and resolved.startswith("finance-expert")
+
+        # PD 分离: 按模型类型路由到不同上游实例
+        if pd_disagg:
+            target = upstream_expert if is_expert_request else upstream_base
+            url = f"{target}/v1/{path}"
 
         is_stream = False
         if path.startswith("chat/completions") or path == "chat/completions":
@@ -464,6 +543,11 @@ def create_app(static_dir: Path, upstream: str) -> FastAPI:
                 "transfer-encoding",
                 "upgrade",
             }
+
+            if is_expert_request:
+                await scheduler.acquire_expert()
+            else:
+                scheduler.inc_base()
 
             stream_ts_start = time.time()
             metrics.active_requests += 1
@@ -548,6 +632,10 @@ def create_app(static_dir: Path, upstream: str) -> FastAPI:
                         await upstream_resp.aclose()
                         await client.aclose()
                         metrics.active_requests -= 1
+                        if is_expert_request:
+                            scheduler.release_expert()
+                        else:
+                            scheduler.dec_base()
                         if PROMETHEUS_AVAILABLE:
                             FINSERVE_REQUESTS_IN_FLIGHT.dec()
                         ts_end = time.time()
@@ -581,9 +669,18 @@ def create_app(static_dir: Path, upstream: str) -> FastAPI:
                     await upstream_resp.aclose()
                 await client.aclose()
                 metrics.active_requests -= 1
+                if is_expert_request:
+                    scheduler.release_expert()
+                else:
+                    scheduler.dec_base()
                 if PROMETHEUS_AVAILABLE:
                     FINSERVE_REQUESTS_IN_FLIGHT.dec()
                 raise
+
+        if is_expert_request:
+            await scheduler.acquire_expert()
+        else:
+            scheduler.inc_base()
 
         ts_start = time.time()
         metrics.active_requests += 1
@@ -601,6 +698,10 @@ def create_app(static_dir: Path, upstream: str) -> FastAPI:
             ts_end = time.time()
         finally:
             metrics.active_requests -= 1
+            if is_expert_request:
+                scheduler.release_expert()
+            else:
+                scheduler.dec_base()
             if PROMETHEUS_AVAILABLE:
                 FINSERVE_REQUESTS_IN_FLIGHT.dec()
 
@@ -665,13 +766,35 @@ def main():
     parser.add_argument(
         "--upstream",
         default="http://127.0.0.1:8000",
-        help="vLLM OpenAI 服务地址",
+        help="vLLM OpenAI 服务地址 (单实例模式)",
+    )
+    parser.add_argument(
+        "--upstream-expert",
+        default=None,
+        help="[PD 分离] Expert 上游 (Prefill 节点), 如 http://127.0.0.1:8000",
+    )
+    parser.add_argument(
+        "--upstream-base",
+        default=None,
+        help="[PD 分离] Base 上游 (Decode 节点), 如 http://127.0.0.1:8001",
+    )
+    parser.add_argument(
+        "--max-expert-concurrency",
+        type=int,
+        default=2,
+        help="Expert 请求最大并发数 (防止长 Prefill 队头阻塞, 默认 2)",
     )
     args = parser.parse_args()
 
     import uvicorn
 
-    app = create_app(Path(args.static_dir), args.upstream)
+    app = create_app(
+        Path(args.static_dir),
+        args.upstream,
+        upstream_expert=args.upstream_expert,
+        upstream_base=args.upstream_base,
+        max_expert_concurrency=args.max_expert_concurrency,
+    )
     uvicorn.run(app, host=args.host, port=args.port, log_level="info")
 
 
