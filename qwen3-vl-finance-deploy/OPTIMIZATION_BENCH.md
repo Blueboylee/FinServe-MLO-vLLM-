@@ -10,6 +10,13 @@
 
 未优化 = 用 `serve_multi_lora_unopt.sh` 或设 `ENABLE_CHUNKED_PREFILL=false`、`ENABLE_PREFIX_CACHING=false`、`FINSERVE_LORA_REORDER=0` 再起服务。
 
+**关于 SGMV**：本仓库里有 **`sgmv_lora_triton.py`**，用 Triton 实现了「多专家 LoRA 在一个 kernel 里做 X@B@A」的 SGMV 风格计算。vLLM 服务未接入，但可用 **`bench_sgmv_compare.py`** 做「使用 SGMV 前 vs 使用 SGMV 后」的压测对比（纯 LoRA 矩阵乘层，不经过 vLLM）：
+
+```bash
+python bench_sgmv_compare.py --batch 256 --iterations 500
+# 可调: --in-dim 4096 --r 64 --out-dim 4096 --num-adapters 3
+```
+
 **为什么「全相同长 prompt」压测时差异很小？**  
 - 全是同一种长 prompt：没有「长短混合」，Chunked Prefill 的「长不堵短」用不上。  
 - 只打一个 expert：没有多 adapter 混合，LoRA Reorder 用不上。  

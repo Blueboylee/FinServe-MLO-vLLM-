@@ -8,6 +8,7 @@
 - LoRA Reorder：等待队列按 adapter 聚批，减少 LoRA 切换
 
 未优化 = 上述三项在 serve_multi_lora.sh 中关闭（env 传 false/0）。
+注意：SGMV（sgmv_lora_triton.py）未接入 vLLM，本脚本对比的「优化后」不包含 SGMV。
 
 【为何「全相同长 prompt」压测差异小】
 - 全相同长 prompt：没有「长短混合」，Chunked Prefill 的「长不堵短」发挥不出来

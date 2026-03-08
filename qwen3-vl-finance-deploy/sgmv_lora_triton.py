@@ -222,8 +222,9 @@ def sgmv_lora_forward(
 
     # 排序后的 x，使同一段的行连续
     x_sorted = x[sort_to_orig]  # [batch, in_dim]
-    # 中间结果 mid [batch, r]，out 用 float32 便于 kernel 写，最后再转回 dtype
-    mid = torch.empty((batch, r), device=device, dtype=torch.float32)
+    # 中间结果 mid [batch, r]：保持与输入相同 dtype（通常为 fp16），
+    # 这样在 Triton kernel 中 mid 和 A 的 dtype 一致，tl.dot 不会报类型不匹配。
+    mid = torch.empty((batch, r), device=device, dtype=dtype)
     out_sorted = torch.empty((batch, out_dim), device=device, dtype=torch.float32)
 
     # 阶段 1: 每段内按 BLOCK_M 行分块，逐段 launch
