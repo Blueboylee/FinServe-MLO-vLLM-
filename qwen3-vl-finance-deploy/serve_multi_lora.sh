@@ -1,8 +1,8 @@
 #!/bin/bash
 # ============================================
-#  vLLM 多 LoRA 服务 (PD 优化版 + LoRA 亲和调度)
+#  vLLM 多 LoRA 服务 (PD 优化版 + LoRA 亲和调度 + SGMV 优化)
 #  支持: 单实例 Chunked Prefill / PD 分离架构
-#  解决专家长 Prefill 对基座请求的队头阻塞
+#  解决专家长Prefill对基座请求的队头阻塞
 #  + LoRA-Aware Scheduler Plugin 减少 adapter 切换
 # ============================================
 
@@ -35,6 +35,10 @@ export FINSERVE_LORA_REORDER="${FINSERVE_LORA_REORDER:-1}"
 export FINSERVE_LORA_MAX_WAIT_SEC="${FINSERVE_LORA_MAX_WAIT_SEC:-10}"
 export FINSERVE_LORA_GROUP_CAP="${FINSERVE_LORA_GROUP_CAP:-0}"
 
+# SGMV 优化配置
+export ENABLE_SGMV_OPTIMIZATION="${ENABLE_SGMV_OPTIMIZATION:-1}"
+export SGMV_ENABLE_FUSED="${SGMV_ENABLE_FUSED:-1}"
+
 # PD 分离配置 (仅 DEPLOY_MODE=disagg 时生效)
 PREFILL_GPU="${PREFILL_GPU:-0}"
 DECODE_GPU="${DECODE_GPU:-1}"
@@ -51,7 +55,7 @@ if [ -d "$PLUGIN_DIR" ]; then
 fi
 
 echo "============================================"
-echo "  vLLM 多 LoRA 服务 [PD 优化 + LoRA 亲和调度]"
+echo "  vLLM 多 LoRA 服务 [PD 优化 + LoRA 亲和调度 + SGMV 优化]"
 echo "============================================"
 echo "  基座模型:        $BASE_MODEL"
 echo "  Expert-A:        $EXPERT_A"
@@ -60,6 +64,7 @@ echo "  部署模式:        $DEPLOY_MODE"
 echo "  Chunked Prefill: $ENABLE_CHUNKED_PREFILL (chunk=$MAX_NUM_BATCHED_TOKENS)"
 echo "  Prefix Caching:  $ENABLE_PREFIX_CACHING"
 echo "  LoRA Reorder:    $FINSERVE_LORA_REORDER (max_wait=${FINSERVE_LORA_MAX_WAIT_SEC}s)"
+echo "  SGMV 优化:       $ENABLE_SGMV_OPTIMIZATION (fused=$SGMV_ENABLE_FUSED)"
 echo "============================================"
 
 # 检查 LoRA adapter_config.json 中的 rank，并映射到 vLLM 支持的 max-lora-rank
@@ -140,18 +145,64 @@ if [ "$DEPLOY_MODE" = "disagg" ]; then
     wait -n $PREFILL_PID $DECODE_PID
 
 else
-    # 单实例模式: Chunked Prefill + Prefix Caching 优化
-    vllm serve "$BASE_MODEL" \
-        --host "$HOST" \
-        --port "$PORT" \
-        --max-model-len "$MAX_MODEL_LEN" \
-        --gpu-memory-utilization "$GPU_UTIL" \
-        --trust-remote-code \
-        --enable-lora \
-        --max-loras 2 \
-        --max-lora-rank "$LORA_RANK" \
-        --max-cpu-loras 2 \
-        --lora-modules "finance-expert-a=$EXPERT_A" "finance-expert-b=$EXPERT_B" \
-        --limit-mm-per-prompt '{"image": 4, "video": 1}' \
-        $OPT_FLAGS
+    # 单实例模式: Chunked Prefill + Prefix Caching + SGMV 优化
+    echo ""
+    echo "[SGMV 优化] 应用 SGMV Kernel 优化..."
+    echo "  - SGMV Shrink Kernel (Token/Segment 并行)"
+    echo "  - SGMV Expand Kernel (Token/Segment 并行 + Tensor Core)"
+    echo "  - Fused SGMV (shrink+expand 融合)"
+    echo "  - Fused LoRA+RMSNorm (base+delta+residual+norm 三路融合)"
+    echo ""
+    
+    # 启动服务并应用 SGMV 优化
+    CUDA_VISIBLE_DEVICES=0 python3 -c "
+import os
+os.environ['ENABLE_SGMV_OPTIMIZATION'] = '$ENABLE_SGMV_OPTIMIZATION'
+os.environ['SGMV_ENABLE_FUSED'] = '$SGMV_ENABLE_FUSED'
+
+# 导入 SGMV 优化模块
+from sgmv_kernel.sgmv_integration import apply_sgmv_optimizations
+
+# 启动 vLLM 服务
+import subprocess
+import sys
+
+cmd = [
+    'vllm', 'serve', '$BASE_MODEL',
+    '--host', '$HOST',
+    '--port', '$PORT',
+    '--max-model-len', '$MAX_MODEL_LEN',
+    '--gpu-memory-utilization', '$GPU_UTIL',
+    '--trust-remote-code',
+    '--enable-lora',
+    '--max-loras', '2',
+    '--max-lora-rank', '$LORA_RANK',
+    '--max-cpu-loras', '2',
+    '--lora-modules', 'finance-expert-a=$EXPERT_A', 'finance-expert-b=$EXPERT_B',
+    '--limit-mm-per-prompt', '{\"image\": 4, \"video\": 1}',
+] + '$OPT_FLAGS'.split()
+
+print('启动命令:', ' '.join(cmd))
+print('')
+
+# 启动 vLLM 服务进程
+proc = subprocess.Popen(cmd, stdout=sys.stdout, stderr=sys.stderr)
+
+# 等待服务启动
+import time
+time.sleep(30)
+
+# 应用 SGMV 优化
+if os.environ.get('ENABLE_SGMV_OPTIMIZATION', '1') == '1':
+    print('')
+    print('=' * 60)
+    print('启用 SGMV Kernel 优化')
+    print('=' * 60)
+    patched = apply_sgmv_optimizations(enable_fused=os.environ.get('SGMV_ENABLE_FUSED', '1') == '1')
+    print(f'已 patch 的算子: {patched}')
+    print('=' * 60)
+
+# 等待服务进程
+proc.wait()
+"
 fi

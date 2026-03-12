@@ -1,14 +1,3 @@
-"""
-LoRA-Aware Chunked Prefill Patch for vLLM Scheduler
-
-在每次 schedule() 调用前，对 waiting queue 进行 LoRA 亲和性重排：
-  1. 优先调度 LoRA 权重已在 GPU 上的请求（减少 adapter 切换）
-  2. 将使用相同 adapter 的请求分组（利用 S-LoRA/Punica BGMV 批量计算）
-  3. 反饥饿：等待超过阈值的请求无条件提升优先级
-
-适用场景：Multi-LoRA serving，如 Expert-A / Expert-B 共享基座模型。
-"""
-
 import logging
 import os
 import time
@@ -20,9 +9,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("finserve.lora_scheduler")
 
-# ---------------------------------------------------------------------------
-# 可通过环境变量调整的参数
-# ---------------------------------------------------------------------------
 LORA_MAX_WAIT_SEC = float(os.environ.get("FINSERVE_LORA_MAX_WAIT_SEC", "10"))
 LORA_GROUP_CAP = int(os.environ.get("FINSERVE_LORA_GROUP_CAP", "0"))
 LORA_REORDER_ENABLED = os.environ.get(
@@ -34,8 +20,6 @@ _LOG_INTERVAL = 50
 
 
 def _get_hot_lora_ids(scheduler: "Scheduler") -> set[int]:
-    """返回当前 running 请求中正在使用的 LoRA adapter ID 集合。
-    这些 adapter 的权重大概率已在 GPU buffer 中，切换成本低。"""
     hot = set()
     for req in scheduler.running:
         lr = getattr(req, "lora_request", None)
@@ -45,14 +29,6 @@ def _get_hot_lora_ids(scheduler: "Scheduler") -> set[int]:
 
 
 def _reorder_waiting_queue(scheduler: "Scheduler") -> None:
-    """对 waiting queue 执行 LoRA 亲和性重排。
-
-    排序维度（优先级从高到低）：
-      0) 饥饿防护 — 等待超过 LORA_MAX_WAIT_SEC 的请求无条件置顶
-      1) GPU 亲和 — adapter 已在 GPU 上的请求优先
-      2) 分组聚合 — 相同 adapter 的请求连续排列
-      3) 原始顺序 — 组内保持 FCFS（用插入序号做稳定排序）
-    """
     global _reorder_count
 
     waiting = scheduler.waiting
@@ -83,7 +59,7 @@ def _reorder_waiting_queue(scheduler: "Scheduler") -> None:
         elif lora_id > 0:
             hot = 1
         else:
-            hot = 0  # no-LoRA 请求视为"中性"，不惩罚
+            hot = 0
 
         return (starving, hot, lora_id, idx)
 
@@ -113,8 +89,6 @@ def _reorder_waiting_queue(scheduler: "Scheduler") -> None:
 
 
 def _apply_group_cap(indexed, cap: int):
-    """限制同一 LoRA group 连续调度的最大数量，防止单一 adapter 长期霸占 batch。
-    超出 cap 的请求被轮转到下一轮。"""
     from collections import defaultdict
 
     group_counts: dict[int, int] = defaultdict(int)
@@ -135,11 +109,6 @@ def _apply_group_cap(indexed, cap: int):
 
 
 def apply_lora_grouped_prefill_patch() -> None:
-    """Monkey-patch Scheduler.schedule() 以注入 LoRA 亲和性重排。
-
-    通过 vLLM general_plugins 在进程启动时调用，确保所有 worker
-    进程使用同一个 patched schedule()。
-    """
     if not LORA_REORDER_ENABLED:
         logger.info("LoRA grouped prefill is DISABLED (FINSERVE_LORA_REORDER=0)")
         return
@@ -161,7 +130,6 @@ def apply_lora_grouped_prefill_patch() -> None:
     original_schedule = Scheduler.schedule
 
     def lora_aware_schedule(self):
-        """Wrapper: 在原始 schedule() 前执行 LoRA 亲和性重排。"""
         if getattr(self, "lora_config", None) and self.waiting:
             try:
                 _reorder_waiting_queue(self)

@@ -1,0 +1,11 @@
+name: qwen3-vl-unsloth
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - setuptools<81
+  - wheel
+  - ninja
+  - git
