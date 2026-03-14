@@ -1,0 +1,3579 @@
+{
+  "meta": {
+    "timestamp": "2026-03-14 00:30:52",
+    "mode": "full",
+    "batch_sizes": [
+      1,
+      4,
+      8,
+      16,
+      32,
+      64
+    ],
+    "num_runs": 3,
+    "max_tokens": 256,
+    "configs": [
+      "baseline",
+      "sgmv_full"
+    ],
+    "note": "ALL VALUES MEASURED, ZERO ESTIMATION"
+  },
+  "raw": {
+    "baseline": {
+      "config_name": "baseline",
+      "config": {
+        "label": "Baseline (vLLM native)",
+        "sgmv": false,
+        "sgmv_fused": false,
+        "sgmv_tensor_core": false,
+        "sgmv_rmsnorm": false
+      },
+      "patched_ops": [],
+      "metrics_source": "wall_clock_only",
+      "batch_results": {
+        "1": [
+          {
+            "run_idx": 0,
+            "wall_time_s": 1.5023,
+            "batch_size": 1,
+            "total_output_tokens": 121,
+            "throughput_tok_s": 80.55,
+            "qps": 0.666,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 121,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          },
+          {
+            "run_idx": 1,
+            "wall_time_s": 0.8875,
+            "batch_size": 1,
+            "total_output_tokens": 71,
+            "throughput_tok_s": 80.0,
+            "qps": 1.127,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 71,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          },
+          {
+            "run_idx": 2,
+            "wall_time_s": 1.6134,
+            "batch_size": 1,
+            "total_output_tokens": 130,
+            "throughput_tok_s": 80.57,
+            "qps": 0.62,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 130,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          }
+        ],
+        "4": [
+          {
+            "run_idx": 0,
+            "wall_time_s": 4.2371,
+            "batch_size": 4,
+            "total_output_tokens": 595,
+            "throughput_tok_s": 140.43,
+            "qps": 0.944,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 70,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 1,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 2,
+                "expert": "finance-expert-a",
+                "output_tokens": 100,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 3,
+                "expert": "finance-expert-b",
+                "output_tokens": 169,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          },
+          {
+            "run_idx": 1,
+            "wall_time_s": 4.6503,
+            "batch_size": 4,
+            "total_output_tokens": 773,
+            "throughput_tok_s": 166.23,
+            "qps": 0.86,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 119,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 1,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 2,
+                "expert": "finance-expert-a",
+                "output_tokens": 142,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 3,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          },
+          {
+            "run_idx": 2,
+            "wall_time_s": 4.7307,
+            "batch_size": 4,
+            "total_output_tokens": 496,
+            "throughput_tok_s": 104.85,
+            "qps": 0.846,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 88,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 1,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 2,
+                "expert": "finance-expert-a",
+                "output_tokens": 132,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 3,
+                "expert": "finance-expert-b",
+                "output_tokens": 20,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          }
+        ],
+        "8": [
+          {
+            "run_idx": 0,
+            "wall_time_s": 6.1455,
+            "batch_size": 8,
+            "total_output_tokens": 1643,
+            "throughput_tok_s": 267.35,
+            "qps": 1.302,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 54,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 1,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 2,
+                "expert": "finance-expert-a",
+                "output_tokens": 154,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 3,
+                "expert": "finance-expert-b",
+                "output_tokens": 198,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 4,
+                "expert": "finance-expert-a",
+                "output_tokens": 248,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 5,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 6,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 7,
+                "expert": "finance-expert-b",
+                "output_tokens": 221,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          },
+          {
+            "run_idx": 1,
+            "wall_time_s": 4.7068,
+            "batch_size": 8,
+            "total_output_tokens": 1423,
+            "throughput_tok_s": 302.33,
+            "qps": 1.7,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 129,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 1,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 2,
+                "expert": "finance-expert-a",
+                "output_tokens": 57,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 3,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 4,
+                "expert": "finance-expert-a",
+                "output_tokens": 135,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 5,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 6,
+                "expert": "finance-expert-a",
+                "output_tokens": 78,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 7,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          },
+          {
+            "run_idx": 2,
+            "wall_time_s": 6.2317,
+            "batch_size": 8,
+            "total_output_tokens": 1491,
+            "throughput_tok_s": 239.26,
+            "qps": 1.284,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 140,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 1,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 2,
+                "expert": "finance-expert-a",
+                "output_tokens": 72,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 3,
+                "expert": "finance-expert-b",
+                "output_tokens": 92,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 4,
+                "expert": "finance-expert-a",
+                "output_tokens": 163,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 5,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 6,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 7,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          }
+        ],
+        "16": [
+          {
+            "run_idx": 0,
+            "wall_time_s": 6.1495,
+            "batch_size": 16,
+            "total_output_tokens": 3195,
+            "throughput_tok_s": 519.55,
+            "qps": 2.602,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 1,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 2,
+                "expert": "finance-expert-a",
+                "output_tokens": 66,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 3,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 4,
+                "expert": "finance-expert-a",
+                "output_tokens": 151,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 5,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 6,
+                "expert": "finance-expert-a",
+                "output_tokens": 188,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 7,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 8,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 9,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 10,
+                "expert": "finance-expert-a",
+                "output_tokens": 134,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 11,
+                "expert": "finance-expert-b",
+                "output_tokens": 27,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 12,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 13,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 14,
+                "expert": "finance-expert-a",
+                "output_tokens": 69,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 15,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          },
+          {
+            "run_idx": 1,
+            "wall_time_s": 6.1624,
+            "batch_size": 16,
+            "total_output_tokens": 3051,
+            "throughput_tok_s": 495.1,
+            "qps": 2.596,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 67,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 1,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 2,
+                "expert": "finance-expert-a",
+                "output_tokens": 36,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 3,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 4,
+                "expert": "finance-expert-a",
+                "output_tokens": 219,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 5,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 6,
+                "expert": "finance-expert-a",
+                "output_tokens": 86,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 7,
+                "expert": "finance-expert-b",
+                "output_tokens": 232,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 8,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 9,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 10,
+                "expert": "finance-expert-a",
+                "output_tokens": 111,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 11,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 12,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 13,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 14,
+                "expert": "finance-expert-a",
+                "output_tokens": 87,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 15,
+                "expert": "finance-expert-b",
+                "output_tokens": 165,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          },
+          {
+            "run_idx": 2,
+            "wall_time_s": 6.135,
+            "batch_size": 16,
+            "total_output_tokens": 3277,
+            "throughput_tok_s": 534.15,
+            "qps": 2.608,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 1,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 2,
+                "expert": "finance-expert-a",
+                "output_tokens": 140,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 3,
+                "expert": "finance-expert-b",
+                "output_tokens": 136,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 4,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 5,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 6,
+                "expert": "finance-expert-a",
+                "output_tokens": 100,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 7,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 8,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 9,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 10,
+                "expert": "finance-expert-a",
+                "output_tokens": 72,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 11,
+                "expert": "finance-expert-b",
+                "output_tokens": 51,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 12,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 13,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 14,
+                "expert": "finance-expert-a",
+                "output_tokens": 218,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 15,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          }
+        ],
+        "32": [
+          {
+            "run_idx": 0,
+            "wall_time_s": 6.3798,
+            "batch_size": 32,
+            "total_output_tokens": 5722,
+            "throughput_tok_s": 896.89,
+            "qps": 5.016,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 115,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 1,
+                "expert": "finance-expert-b",
+                "output_tokens": 251,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 2,
+                "expert": "finance-expert-a",
+                "output_tokens": 145,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 3,
+                "expert": "finance-expert-b",
+                "output_tokens": 16,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 4,
+                "expert": "finance-expert-a",
+                "output_tokens": 128,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 5,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 6,
+                "expert": "finance-expert-a",
+                "output_tokens": 142,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 7,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 8,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 9,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 10,
+                "expert": "finance-expert-a",
+                "output_tokens": 112,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 11,
+                "expert": "finance-expert-b",
+                "output_tokens": 113,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 12,
+                "expert": "finance-expert-a",
+                "output_tokens": 208,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 13,
+                "expert": "finance-expert-b",
+                "output_tokens": 209,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 14,
+                "expert": "finance-expert-a",
+                "output_tokens": 94,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 15,
+                "expert": "finance-expert-b",
+                "output_tokens": 113,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 16,
+                "expert": "finance-expert-a",
+                "output_tokens": 142,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 17,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 18,
+                "expert": "finance-expert-a",
+                "output_tokens": 85,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 19,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 20,
+                "expert": "finance-expert-a",
+                "output_tokens": 227,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 21,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 22,
+                "expert": "finance-expert-a",
+                "output_tokens": 57,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 23,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 24,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 25,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 26,
+                "expert": "finance-expert-a",
+                "output_tokens": 179,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 27,
+                "expert": "finance-expert-b",
+                "output_tokens": 99,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 28,
+                "expert": "finance-expert-a",
+                "output_tokens": 93,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 29,
+                "expert": "finance-expert-b",
+                "output_tokens": 233,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 30,
+                "expert": "finance-expert-a",
+                "output_tokens": 166,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 31,
+                "expert": "finance-expert-b",
+                "output_tokens": 235,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          },
+          {
+            "run_idx": 1,
+            "wall_time_s": 6.3822,
+            "batch_size": 32,
+            "total_output_tokens": 5901,
+            "throughput_tok_s": 924.6,
+            "qps": 5.014,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 125,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 1,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 2,
+                "expert": "finance-expert-a",
+                "output_tokens": 88,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 3,
+                "expert": "finance-expert-b",
+                "output_tokens": 62,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 4,
+                "expert": "finance-expert-a",
+                "output_tokens": 189,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 5,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 6,
+                "expert": "finance-expert-a",
+                "output_tokens": 122,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 7,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 8,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 9,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 10,
+                "expert": "finance-expert-a",
+                "output_tokens": 88,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 11,
+                "expert": "finance-expert-b",
+                "output_tokens": 99,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 12,
+                "expert": "finance-expert-a",
+                "output_tokens": 178,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 13,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 14,
+                "expert": "finance-expert-a",
+                "output_tokens": 116,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 15,
+                "expert": "finance-expert-b",
+                "output_tokens": 95,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 16,
+                "expert": "finance-expert-a",
+                "output_tokens": 152,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 17,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 18,
+                "expert": "finance-expert-a",
+                "output_tokens": 75,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 19,
+                "expert": "finance-expert-b",
+                "output_tokens": 116,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 20,
+                "expert": "finance-expert-a",
+                "output_tokens": 175,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 21,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 22,
+                "expert": "finance-expert-a",
+                "output_tokens": 118,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 23,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 24,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 25,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 26,
+                "expert": "finance-expert-a",
+                "output_tokens": 219,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 27,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 28,
+                "expert": "finance-expert-a",
+                "output_tokens": 197,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 29,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 30,
+                "expert": "finance-expert-a",
+                "output_tokens": 103,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 31,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          },
+          {
+            "run_idx": 2,
+            "wall_time_s": 6.3971,
+            "batch_size": 32,
+            "total_output_tokens": 6045,
+            "throughput_tok_s": 944.96,
+            "qps": 5.002,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 65,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 1,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 2,
+                "expert": "finance-expert-a",
+                "output_tokens": 120,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 3,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 4,
+                "expert": "finance-expert-a",
+                "output_tokens": 136,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 5,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 6,
+                "expert": "finance-expert-a",
+                "output_tokens": 73,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 7,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 8,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 9,
+                "expert": "finance-expert-b",
+                "output_tokens": 1,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 10,
+                "expert": "finance-expert-a",
+                "output_tokens": 81,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 11,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 12,
+                "expert": "finance-expert-a",
+                "output_tokens": 192,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 13,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 14,
+                "expert": "finance-expert-a",
+                "output_tokens": 108,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 15,
+                "expert": "finance-expert-b",
+                "output_tokens": 243,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 16,
+                "expert": "finance-expert-a",
+                "output_tokens": 96,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 17,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 18,
+                "expert": "finance-expert-a",
+                "output_tokens": 139,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 19,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 20,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 21,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 22,
+                "expert": "finance-expert-a",
+                "output_tokens": 125,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 23,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 24,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 25,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 26,
+                "expert": "finance-expert-a",
+                "output_tokens": 208,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 27,
+                "expert": "finance-expert-b",
+                "output_tokens": 1,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 28,
+                "expert": "finance-expert-a",
+                "output_tokens": 232,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 29,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 30,
+                "expert": "finance-expert-a",
+                "output_tokens": 129,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 31,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          }
+        ],
+        "64": [
+          {
+            "run_idx": 0,
+            "wall_time_s": 7.154,
+            "batch_size": 64,
+            "total_output_tokens": 11917,
+            "throughput_tok_s": 1665.78,
+            "qps": 8.946,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 137,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 1,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 2,
+                "expert": "finance-expert-a",
+                "output_tokens": 149,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 3,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 4,
+                "expert": "finance-expert-a",
+                "output_tokens": 185,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 5,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 6,
+                "expert": "finance-expert-a",
+                "output_tokens": 123,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 7,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 8,
+                "expert": "finance-expert-a",
+                "output_tokens": 228,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 9,
+                "expert": "finance-expert-b",
+                "output_tokens": 1,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 10,
+                "expert": "finance-expert-a",
+                "output_tokens": 203,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 11,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 12,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 13,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 14,
+                "expert": "finance-expert-a",
+                "output_tokens": 94,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 15,
+                "expert": "finance-expert-b",
+                "output_tokens": 227,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 16,
+                "expert": "finance-expert-a",
+                "output_tokens": 136,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 17,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 18,
+                "expert": "finance-expert-a",
+                "output_tokens": 234,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 19,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 20,
+                "expert": "finance-expert-a",
+                "output_tokens": 147,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 21,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 22,
+                "expert": "finance-expert-a",
+                "output_tokens": 61,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 23,
+                "expert": "finance-expert-b",
+                "output_tokens": 97,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 24,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 25,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 26,
+                "expert": "finance-expert-a",
+                "output_tokens": 135,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 27,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 28,
+                "expert": "finance-expert-a",
+                "output_tokens": 129,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 29,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 30,
+                "expert": "finance-expert-a",
+                "output_tokens": 167,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 31,
+                "expert": "finance-expert-b",
+                "output_tokens": 232,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 32,
+                "expert": "finance-expert-a",
+                "output_tokens": 107,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 33,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 34,
+                "expert": "finance-expert-a",
+                "output_tokens": 65,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 35,
+                "expert": "finance-expert-b",
+                "output_tokens": 1,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 36,
+                "expert": "finance-expert-a",
+                "output_tokens": 186,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 37,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 38,
+                "expert": "finance-expert-a",
+                "output_tokens": 89,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 39,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 40,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 41,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 42,
+                "expert": "finance-expert-a",
+                "output_tokens": 89,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 43,
+                "expert": "finance-expert-b",
+                "output_tokens": 24,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 44,
+                "expert": "finance-expert-a",
+                "output_tokens": 175,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 45,
+                "expert": "finance-expert-b",
+                "output_tokens": 201,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 46,
+                "expert": "finance-expert-a",
+                "output_tokens": 195,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 47,
+                "expert": "finance-expert-b",
+                "output_tokens": 220,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 48,
+                "expert": "finance-expert-a",
+                "output_tokens": 130,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 49,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 50,
+                "expert": "finance-expert-a",
+                "output_tokens": 86,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 51,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 52,
+                "expert": "finance-expert-a",
+                "output_tokens": 235,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 53,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 54,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 55,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 56,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 57,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 58,
+                "expert": "finance-expert-a",
+                "output_tokens": 77,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 59,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 60,
+                "expert": "finance-expert-a",
+                "output_tokens": 100,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 61,
+                "expert": "finance-expert-b",
+                "output_tokens": 13,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 62,
+                "expert": "finance-expert-a",
+                "output_tokens": 230,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 63,
+                "expert": "finance-expert-b",
+                "output_tokens": 97,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          },
+          {
+            "run_idx": 1,
+            "wall_time_s": 7.1328,
+            "batch_size": 64,
+            "total_output_tokens": 11827,
+            "throughput_tok_s": 1658.12,
+            "qps": 8.973,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 87,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 1,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 2,
+                "expert": "finance-expert-a",
+                "output_tokens": 73,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 3,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 4,
+                "expert": "finance-expert-a",
+                "output_tokens": 162,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 5,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 6,
+                "expert": "finance-expert-a",
+                "output_tokens": 90,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 7,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 8,
+                "expert": "finance-expert-a",
+                "output_tokens": 244,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 9,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 10,
+                "expert": "finance-expert-a",
+                "output_tokens": 72,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 11,
+                "expert": "finance-expert-b",
+                "output_tokens": 175,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 12,
+                "expert": "finance-expert-a",
+                "output_tokens": 100,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 13,
+                "expert": "finance-expert-b",
+                "output_tokens": 194,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 14,
+                "expert": "finance-expert-a",
+                "output_tokens": 90,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 15,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 16,
+                "expert": "finance-expert-a",
+                "output_tokens": 85,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 17,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 18,
+                "expert": "finance-expert-a",
+                "output_tokens": 153,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 19,
+                "expert": "finance-expert-b",
+                "output_tokens": 106,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 20,
+                "expert": "finance-expert-a",
+                "output_tokens": 252,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 21,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 22,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 23,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 24,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 25,
+                "expert": "finance-expert-b",
+                "output_tokens": 243,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 26,
+                "expert": "finance-expert-a",
+                "output_tokens": 176,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 27,
+                "expert": "finance-expert-b",
+                "output_tokens": 226,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 28,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 29,
+                "expert": "finance-expert-b",
+                "output_tokens": 188,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 30,
+                "expert": "finance-expert-a",
+                "output_tokens": 237,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 31,
+                "expert": "finance-expert-b",
+                "output_tokens": 230,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 32,
+                "expert": "finance-expert-a",
+                "output_tokens": 104,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 33,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 34,
+                "expert": "finance-expert-a",
+                "output_tokens": 56,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 35,
+                "expert": "finance-expert-b",
+                "output_tokens": 95,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 36,
+                "expert": "finance-expert-a",
+                "output_tokens": 108,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 37,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 38,
+                "expert": "finance-expert-a",
+                "output_tokens": 224,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 39,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 40,
+                "expert": "finance-expert-a",
+                "output_tokens": 181,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 41,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 42,
+                "expert": "finance-expert-a",
+                "output_tokens": 168,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 43,
+                "expert": "finance-expert-b",
+                "output_tokens": 243,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 44,
+                "expert": "finance-expert-a",
+                "output_tokens": 195,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 45,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 46,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 47,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 48,
+                "expert": "finance-expert-a",
+                "output_tokens": 80,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 49,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 50,
+                "expert": "finance-expert-a",
+                "output_tokens": 202,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 51,
+                "expert": "finance-expert-b",
+                "output_tokens": 1,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 52,
+                "expert": "finance-expert-a",
+                "output_tokens": 44,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 53,
+                "expert": "finance-expert-b",
+                "output_tokens": 209,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 54,
+                "expert": "finance-expert-a",
+                "output_tokens": 84,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 55,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 56,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 57,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 58,
+                "expert": "finance-expert-a",
+                "output_tokens": 59,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 59,
+                "expert": "finance-expert-b",
+                "output_tokens": 134,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 60,
+                "expert": "finance-expert-a",
+                "output_tokens": 84,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 61,
+                "expert": "finance-expert-b",
+                "output_tokens": 255,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 62,
+                "expert": "finance-expert-a",
+                "output_tokens": 58,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 63,
+                "expert": "finance-expert-b",
+                "output_tokens": 172,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          },
+          {
+            "run_idx": 2,
+            "wall_time_s": 7.1866,
+            "batch_size": 64,
+            "total_output_tokens": 12234,
+            "throughput_tok_s": 1702.34,
+            "qps": 8.905,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 89,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 1,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 2,
+                "expert": "finance-expert-a",
+                "output_tokens": 134,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 3,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 4,
+                "expert": "finance-expert-a",
+                "output_tokens": 160,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 5,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 6,
+                "expert": "finance-expert-a",
+                "output_tokens": 128,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 7,
+                "expert": "finance-expert-b",
+                "output_tokens": 219,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 8,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 9,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 10,
+                "expert": "finance-expert-a",
+                "output_tokens": 218,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 11,
+                "expert": "finance-expert-b",
+                "output_tokens": 242,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 12,
+                "expert": "finance-expert-a",
+                "output_tokens": 248,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 13,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 14,
+                "expert": "finance-expert-a",
+                "output_tokens": 92,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 15,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 16,
+                "expert": "finance-expert-a",
+                "output_tokens": 176,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 17,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 18,
+                "expert": "finance-expert-a",
+                "output_tokens": 71,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 19,
+                "expert": "finance-expert-b",
+                "output_tokens": 111,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 20,
+                "expert": "finance-expert-a",
+                "output_tokens": 148,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 21,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 22,
+                "expert": "finance-expert-a",
+                "output_tokens": 193,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 23,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 24,
+                "expert": "finance-expert-a",
+                "output_tokens": 239,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 25,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 26,
+                "expert": "finance-expert-a",
+                "output_tokens": 51,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 27,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 28,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 29,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 30,
+                "expert": "finance-expert-a",
+                "output_tokens": 230,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 31,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 32,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 33,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 34,
+                "expert": "finance-expert-a",
+                "output_tokens": 75,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 35,
+                "expert": "finance-expert-b",
+                "output_tokens": 126,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 36,
+                "expert": "finance-expert-a",
+                "output_tokens": 46,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 37,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 38,
+                "expert": "finance-expert-a",
+                "output_tokens": 123,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 39,
+                "expert": "finance-expert-b",
+                "output_tokens": 244,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 40,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 41,
+                "expert": "finance-expert-b",
+                "output_tokens": 1,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 42,
+                "expert": "finance-expert-a",
+                "output_tokens": 81,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 43,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 44,
+                "expert": "finance-expert-a",
+                "output_tokens": 84,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 45,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 46,
+                "expert": "finance-expert-a",
+                "output_tokens": 187,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 47,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 48,
+                "expert": "finance-expert-a",
+                "output_tokens": 159,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 49,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 50,
+                "expert": "finance-expert-a",
+                "output_tokens": 77,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 51,
+                "expert": "finance-expert-b",
+                "output_tokens": 188,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 52,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 53,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 54,
+                "expert": "finance-expert-a",
+                "output_tokens": 97,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 55,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 56,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 57,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 58,
+                "expert": "finance-expert-a",
+                "output_tokens": 111,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 59,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 60,
+                "expert": "finance-expert-a",
+                "output_tokens": 95,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 61,
+                "expert": "finance-expert-b",
+                "output_tokens": 13,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 62,
+                "expert": "finance-expert-a",
+                "output_tokens": 98,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 63,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          }
+        ]
+      }
+    },
+    "sgmv_full": {
+      "config_name": "sgmv_full",
+      "error": "exit code 1"
+    }
+  },
+  "summaries": {
+    "baseline": {
+      "1": {
+        "ttft": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "tpot": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "e2e": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "throughput": {
+          "n": 3,
+          "avg": 80.37333333333333,
+          "p50": 80.55,
+          "p95": 80.568,
+          "p99": 80.5696,
+          "min": 80.0,
+          "max": 80.57,
+          "std": 0.2641127705272018
+        },
+        "qps": {
+          "n": 3,
+          "avg": 0.8043333333333335,
+          "p50": 0.666,
+          "p95": 1.0809,
+          "p99": 1.11778,
+          "min": 0.62,
+          "max": 1.127,
+          "std": 0.22893133371287458
+        },
+        "avg_tokens_per_run": 107.33333333333333,
+        "metrics_available": false
+      },
+      "4": {
+        "ttft": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "tpot": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "e2e": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "throughput": {
+          "n": 3,
+          "avg": 137.17,
+          "p50": 140.43,
+          "p95": 163.64999999999998,
+          "p99": 165.714,
+          "min": 104.85,
+          "max": 166.23,
+          "std": 25.164085518850072
+        },
+        "qps": {
+          "n": 3,
+          "avg": 0.8833333333333333,
+          "p50": 0.86,
+          "p95": 0.9356,
+          "p99": 0.9423199999999999,
+          "min": 0.846,
+          "max": 0.944,
+          "std": 0.04327688631231327
+        },
+        "avg_tokens_per_run": 621.3333333333334,
+        "metrics_available": false
+      },
+      "8": {
+        "ttft": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "tpot": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "e2e": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "throughput": {
+          "n": 3,
+          "avg": 269.6466666666667,
+          "p50": 267.35,
+          "p95": 298.832,
+          "p99": 301.63039999999995,
+          "min": 239.26,
+          "max": 302.33,
+          "std": 25.799382852222557
+        },
+        "qps": {
+          "n": 3,
+          "avg": 1.4286666666666665,
+          "p50": 1.302,
+          "p95": 1.6602,
+          "p99": 1.69204,
+          "min": 1.284,
+          "max": 1.7,
+          "std": 0.19200231480086086
+        },
+        "avg_tokens_per_run": 1519.0,
+        "metrics_available": false
+      },
+      "16": {
+        "ttft": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "tpot": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "e2e": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "throughput": {
+          "n": 3,
+          "avg": 516.2666666666667,
+          "p50": 519.55,
+          "p95": 532.69,
+          "p99": 533.858,
+          "min": 495.1,
+          "max": 534.15,
+          "std": 16.11026242975436
+        },
+        "qps": {
+          "n": 3,
+          "avg": 2.6020000000000003,
+          "p50": 2.602,
+          "p95": 2.6074,
+          "p99": 2.6078799999999998,
+          "min": 2.596,
+          "max": 2.608,
+          "std": 0.00489897948556636
+        },
+        "avg_tokens_per_run": 3174.3333333333335,
+        "metrics_available": false
+      },
+      "32": {
+        "ttft": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "tpot": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "e2e": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "throughput": {
+          "n": 3,
+          "avg": 922.15,
+          "p50": 924.6,
+          "p95": 942.924,
+          "p99": 944.5527999999999,
+          "min": 896.89,
+          "max": 944.96,
+          "std": 19.700813857977224
+        },
+        "qps": {
+          "n": 3,
+          "avg": 5.010666666666666,
+          "p50": 5.014,
+          "p95": 5.0158,
+          "p99": 5.01596,
+          "min": 5.002,
+          "max": 5.016,
+          "std": 0.006182412330330619
+        },
+        "avg_tokens_per_run": 5889.333333333333,
+        "metrics_available": false
+      },
+      "64": {
+        "ttft": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "tpot": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "e2e": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "throughput": {
+          "n": 3,
+          "avg": 1675.4133333333332,
+          "p50": 1665.78,
+          "p95": 1698.684,
+          "p99": 1701.6088,
+          "min": 1658.12,
+          "max": 1702.34,
+          "std": 19.2951277672773
+        },
+        "qps": {
+          "n": 3,
+          "avg": 8.941333333333333,
+          "p50": 8.946,
+          "p95": 8.9703,
+          "p99": 8.97246,
+          "min": 8.905,
+          "max": 8.973,
+          "std": 0.027956315128349552
+        },
+        "avg_tokens_per_run": 11992.666666666666,
+        "metrics_available": false
+      }
+    }
+  }
+}

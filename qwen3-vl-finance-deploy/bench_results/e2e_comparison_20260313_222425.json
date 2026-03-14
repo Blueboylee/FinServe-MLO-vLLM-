@@ -1,0 +1,1057 @@
+{
+  "meta": {
+    "timestamp": "2026-03-13 22:28:26",
+    "mode": "quick",
+    "batch_sizes": [
+      1,
+      4,
+      8,
+      16
+    ],
+    "num_runs": 1,
+    "max_tokens": 256,
+    "configs": [
+      "baseline",
+      "sgmv_full"
+    ],
+    "note": "ALL VALUES MEASURED, ZERO ESTIMATION"
+  },
+  "raw": {
+    "baseline": {
+      "config_name": "baseline",
+      "config": {
+        "label": "Baseline (vLLM native)",
+        "sgmv": false,
+        "sgmv_fused": false,
+        "sgmv_tensor_core": false,
+        "sgmv_rmsnorm": false
+      },
+      "patched_ops": [],
+      "metrics_source": "wall_clock_only",
+      "batch_results": {
+        "1": [
+          {
+            "run_idx": 0,
+            "wall_time_s": 1.2926,
+            "batch_size": 1,
+            "total_output_tokens": 104,
+            "throughput_tok_s": 80.46,
+            "qps": 0.774,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 104,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          }
+        ],
+        "4": [
+          {
+            "run_idx": 0,
+            "wall_time_s": 4.0517,
+            "batch_size": 4,
+            "total_output_tokens": 674,
+            "throughput_tok_s": 166.35,
+            "qps": 0.987,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 71,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 1,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 2,
+                "expert": "finance-expert-a",
+                "output_tokens": 91,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 3,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          }
+        ],
+        "8": [
+          {
+            "run_idx": 0,
+            "wall_time_s": 5.3482,
+            "batch_size": 8,
+            "total_output_tokens": 1553,
+            "throughput_tok_s": 290.38,
+            "qps": 1.496,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 187,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 1,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 2,
+                "expert": "finance-expert-a",
+                "output_tokens": 91,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 3,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 4,
+                "expert": "finance-expert-a",
+                "output_tokens": 118,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 5,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 6,
+                "expert": "finance-expert-a",
+                "output_tokens": 133,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 7,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          }
+        ],
+        "16": [
+          {
+            "run_idx": 0,
+            "wall_time_s": 6.178,
+            "batch_size": 16,
+            "total_output_tokens": 2973,
+            "throughput_tok_s": 481.22,
+            "qps": 2.59,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 104,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 1,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 2,
+                "expert": "finance-expert-a",
+                "output_tokens": 90,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 3,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 4,
+                "expert": "finance-expert-a",
+                "output_tokens": 146,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 5,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 6,
+                "expert": "finance-expert-a",
+                "output_tokens": 69,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 7,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 8,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 9,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 10,
+                "expert": "finance-expert-a",
+                "output_tokens": 46,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 11,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 12,
+                "expert": "finance-expert-a",
+                "output_tokens": 123,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 13,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 14,
+                "expert": "finance-expert-a",
+                "output_tokens": 91,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 15,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          }
+        ]
+      }
+    },
+    "sgmv_full": {
+      "config_name": "sgmv_full",
+      "config": {
+        "label": "SGMV Full (L0+L1+L2+L3)",
+        "sgmv": true,
+        "sgmv_fused": true,
+        "sgmv_tensor_core": true,
+        "sgmv_rmsnorm": true
+      },
+      "patched_ops": [
+        "RMSNorm + residual → fused LoRA post-process (1-pass, ~50% BW saved)"
+      ],
+      "metrics_source": "wall_clock_only",
+      "batch_results": {
+        "1": [
+          {
+            "run_idx": 0,
+            "wall_time_s": 0.5922,
+            "batch_size": 1,
+            "total_output_tokens": 47,
+            "throughput_tok_s": 79.37,
+            "qps": 1.689,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 47,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          }
+        ],
+        "4": [
+          {
+            "run_idx": 0,
+            "wall_time_s": 4.5649,
+            "batch_size": 4,
+            "total_output_tokens": 745,
+            "throughput_tok_s": 163.2,
+            "qps": 0.876,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 99,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 1,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 2,
+                "expert": "finance-expert-a",
+                "output_tokens": 134,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 3,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          }
+        ],
+        "8": [
+          {
+            "run_idx": 0,
+            "wall_time_s": 6.1406,
+            "batch_size": 8,
+            "total_output_tokens": 1609,
+            "throughput_tok_s": 262.03,
+            "qps": 1.303,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 132,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 1,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 2,
+                "expert": "finance-expert-a",
+                "output_tokens": 184,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 3,
+                "expert": "finance-expert-b",
+                "output_tokens": 104,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 4,
+                "expert": "finance-expert-a",
+                "output_tokens": 240,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 5,
+                "expert": "finance-expert-b",
+                "output_tokens": 181,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 6,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 7,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          }
+        ],
+        "16": [
+          {
+            "run_idx": 0,
+            "wall_time_s": 6.1346,
+            "batch_size": 16,
+            "total_output_tokens": 3026,
+            "throughput_tok_s": 493.27,
+            "qps": 2.608,
+            "per_request": [
+              {
+                "idx": 0,
+                "expert": "finance-expert-a",
+                "output_tokens": 53,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 1,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 2,
+                "expert": "finance-expert-a",
+                "output_tokens": 89,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 3,
+                "expert": "finance-expert-b",
+                "output_tokens": 1,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 4,
+                "expert": "finance-expert-a",
+                "output_tokens": 228,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 5,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 6,
+                "expert": "finance-expert-a",
+                "output_tokens": 133,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 7,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 8,
+                "expert": "finance-expert-a",
+                "output_tokens": 255,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 9,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 10,
+                "expert": "finance-expert-a",
+                "output_tokens": 72,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 11,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 12,
+                "expert": "finance-expert-a",
+                "output_tokens": 147,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 13,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 14,
+                "expert": "finance-expert-a",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              },
+              {
+                "idx": 15,
+                "expert": "finance-expert-b",
+                "output_tokens": 256,
+                "ttft_ms": null,
+                "tpot_ms": null,
+                "e2e_ms": null
+              }
+            ],
+            "metrics_source": "wall_clock_only"
+          }
+        ]
+      }
+    }
+  },
+  "summaries": {
+    "baseline": {
+      "1": {
+        "ttft": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "tpot": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "e2e": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "throughput": {
+          "n": 1,
+          "avg": 80.46,
+          "p50": 80.46,
+          "p95": 80.46,
+          "p99": 80.46,
+          "min": 80.46,
+          "max": 80.46,
+          "std": 0.0
+        },
+        "qps": {
+          "n": 1,
+          "avg": 0.774,
+          "p50": 0.774,
+          "p95": 0.774,
+          "p99": 0.774,
+          "min": 0.774,
+          "max": 0.774,
+          "std": 0.0
+        },
+        "avg_tokens_per_run": 104.0,
+        "metrics_available": false
+      },
+      "4": {
+        "ttft": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "tpot": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "e2e": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "throughput": {
+          "n": 1,
+          "avg": 166.35,
+          "p50": 166.35,
+          "p95": 166.35,
+          "p99": 166.35,
+          "min": 166.35,
+          "max": 166.35,
+          "std": 0.0
+        },
+        "qps": {
+          "n": 1,
+          "avg": 0.987,
+          "p50": 0.987,
+          "p95": 0.987,
+          "p99": 0.987,
+          "min": 0.987,
+          "max": 0.987,
+          "std": 0.0
+        },
+        "avg_tokens_per_run": 674.0,
+        "metrics_available": false
+      },
+      "8": {
+        "ttft": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "tpot": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "e2e": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "throughput": {
+          "n": 1,
+          "avg": 290.38,
+          "p50": 290.38,
+          "p95": 290.38,
+          "p99": 290.38,
+          "min": 290.38,
+          "max": 290.38,
+          "std": 0.0
+        },
+        "qps": {
+          "n": 1,
+          "avg": 1.496,
+          "p50": 1.496,
+          "p95": 1.496,
+          "p99": 1.496,
+          "min": 1.496,
+          "max": 1.496,
+          "std": 0.0
+        },
+        "avg_tokens_per_run": 1553.0,
+        "metrics_available": false
+      },
+      "16": {
+        "ttft": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "tpot": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "e2e": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "throughput": {
+          "n": 1,
+          "avg": 481.22,
+          "p50": 481.22,
+          "p95": 481.22,
+          "p99": 481.22,
+          "min": 481.22,
+          "max": 481.22,
+          "std": 0.0
+        },
+        "qps": {
+          "n": 1,
+          "avg": 2.59,
+          "p50": 2.59,
+          "p95": 2.59,
+          "p99": 2.59,
+          "min": 2.59,
+          "max": 2.59,
+          "std": 0.0
+        },
+        "avg_tokens_per_run": 2973.0,
+        "metrics_available": false
+      }
+    },
+    "sgmv_full": {
+      "1": {
+        "ttft": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "tpot": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "e2e": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "throughput": {
+          "n": 1,
+          "avg": 79.37,
+          "p50": 79.37,
+          "p95": 79.37,
+          "p99": 79.37,
+          "min": 79.37,
+          "max": 79.37,
+          "std": 0.0
+        },
+        "qps": {
+          "n": 1,
+          "avg": 1.689,
+          "p50": 1.689,
+          "p95": 1.689,
+          "p99": 1.689,
+          "min": 1.689,
+          "max": 1.689,
+          "std": 0.0
+        },
+        "avg_tokens_per_run": 47.0,
+        "metrics_available": false
+      },
+      "4": {
+        "ttft": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "tpot": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "e2e": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "throughput": {
+          "n": 1,
+          "avg": 163.2,
+          "p50": 163.2,
+          "p95": 163.2,
+          "p99": 163.2,
+          "min": 163.2,
+          "max": 163.2,
+          "std": 0.0
+        },
+        "qps": {
+          "n": 1,
+          "avg": 0.876,
+          "p50": 0.876,
+          "p95": 0.876,
+          "p99": 0.876,
+          "min": 0.876,
+          "max": 0.876,
+          "std": 0.0
+        },
+        "avg_tokens_per_run": 745.0,
+        "metrics_available": false
+      },
+      "8": {
+        "ttft": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "tpot": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "e2e": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "throughput": {
+          "n": 1,
+          "avg": 262.03,
+          "p50": 262.03,
+          "p95": 262.03,
+          "p99": 262.03,
+          "min": 262.03,
+          "max": 262.03,
+          "std": 0.0
+        },
+        "qps": {
+          "n": 1,
+          "avg": 1.303,
+          "p50": 1.303,
+          "p95": 1.303,
+          "p99": 1.303,
+          "min": 1.303,
+          "max": 1.303,
+          "std": 0.0
+        },
+        "avg_tokens_per_run": 1609.0,
+        "metrics_available": false
+      },
+      "16": {
+        "ttft": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "tpot": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "e2e": {
+          "n": 0.0,
+          "avg": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "std": 0.0
+        },
+        "throughput": {
+          "n": 1,
+          "avg": 493.27,
+          "p50": 493.27,
+          "p95": 493.27,
+          "p99": 493.27,
+          "min": 493.27,
+          "max": 493.27,
+          "std": 0.0
+        },
+        "qps": {
+          "n": 1,
+          "avg": 2.608,
+          "p50": 2.608,
+          "p95": 2.608,
+          "p99": 2.608,
+          "min": 2.608,
+          "max": 2.608,
+          "std": 0.0
+        },
+        "avg_tokens_per_run": 3026.0,
+        "metrics_available": false
+      }
+    }
+  }
+}

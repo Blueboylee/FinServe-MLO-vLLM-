@@ -53,14 +53,14 @@ def fused_rms_norm(
     x: torch.Tensor, w: torch.Tensor, eps: float = 1e-6,
 ) -> torch.Tensor:
     sh = x.shape
-    x2 = x.contiguous().view(-1, sh[-1])
+    x2 = x.view(-1, sh[-1])
     y = torch.empty_like(x2)
     M, N = x2.shape
     _rms_norm_fwd[(M,)](
         x2, w, y, x2.stride(0),
         N=N, eps=eps, BN=triton.next_power_of_2(N),
     )
-    return y.view(*sh[:-1], N)
+    return y.view(sh)
 
 
 # ════════════════════════════════════════════════════════════════

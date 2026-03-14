@@ -1,0 +1,32 @@
+{
+  "meta": {
+    "timestamp": "2026-03-13 21:53:55",
+    "mode": "full",
+    "batch_sizes": [
+      1,
+      4,
+      8,
+      16,
+      32,
+      64
+    ],
+    "num_runs": 5,
+    "max_tokens": 256,
+    "configs": [
+      "baseline",
+      "sgmv_full"
+    ],
+    "note": "ALL VALUES MEASURED, ZERO ESTIMATION"
+  },
+  "raw": {
+    "baseline": {
+      "config_name": "baseline",
+      "error": "exit code 1"
+    },
+    "sgmv_full": {
+      "config_name": "sgmv_full",
+      "error": "exit code 1"
+    }
+  },
+  "summaries": {}
+}

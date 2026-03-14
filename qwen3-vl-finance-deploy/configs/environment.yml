@@ -1,0 +1,16 @@
+name: qwen3-vllm
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - setuptools
+  - cudatoolkit  # 请根据你机器上的 CUDA 版本适配或删除
+  - pip:
+      - vllm
+      - modelscope
+      - transformers
+      - accelerate
+      - peft
+

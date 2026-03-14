@@ -163,13 +163,11 @@ def fused_sgmv(
     Returns:
         base_output (in-place)
     """
-    x = x.contiguous()
     total_tokens, hidden_dim = x.shape
-    output_dim = base_output.shape[1]
     rank = w_a_stacked.shape[2]
     R = triton.next_power_of_2(rank)
 
-    grid = lambda meta: (total_tokens, triton.cdiv(output_dim, meta["BLOCK_N"]))
+    grid = lambda meta: (total_tokens, triton.cdiv(hidden_dim, meta["BLOCK_N"]))
 
     _fused_sgmv_simple_kernel[grid](
         x, w_a_stacked, w_b_stacked, base_output,
@@ -179,7 +177,7 @@ def fused_sgmv(
         w_b_stacked.stride(0), w_b_stacked.stride(1), w_b_stacked.stride(2),
         base_output.stride(0),
         total_tokens, scaling, rank,
-        K=hidden_dim, N=output_dim, R=R,
+        K=hidden_dim, N=hidden_dim, R=R,
     )
     return base_output
 

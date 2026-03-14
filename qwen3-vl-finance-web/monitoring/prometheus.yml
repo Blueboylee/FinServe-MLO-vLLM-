@@ -1,53 +1,20 @@
-# FinServe Prometheus + Grafana 监控
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
 
-用 Prometheus 采集 Web Proxy 的指标，用 Grafana 做专业展示（与内置 dashboard 数据一致，且支持长期存储与告警）。
+scrape_configs:
+  - job_name: "finserve-web"
+    metrics_path: /metrics
+    scrape_interval: 5s
+    static_configs:
+      - targets: ["host.docker.internal:8188"]
+        labels:
+          service: "finserve-proxy"
 
-## 1. 依赖
-
-- Web Proxy 需安装 `prometheus_client`，才会暴露 `/metrics` 端点：
-  ```bash
-  pip install prometheus_client
-  # 或
-  pip install -r ../requirements.txt
-  ```
-- 启动 Web Proxy 时无需额外参数，启动后访问 `http://<proxy_host>:<port>/metrics` 应看到 Prometheus 文本格式指标。
-
-## 2. 指标说明（Prometheus）
-
-| 指标名 | 类型 | 说明 |
-|-------|------|------|
-| `finserve_request_duration_seconds` | Histogram | 请求 E2E 耗时（秒） |
-| `finserve_ttft_seconds` | Histogram | 首 token 时间（秒） |
-| `finserve_tpot_seconds` | Histogram | 每输出 token 耗时（秒） |
-| `finserve_requests_total` | Counter | 请求总数（label: status=success\|error） |
-| `finserve_tokens_total` | Counter | 总 token 数 |
-| `finserve_requests_in_flight` | Gauge | 当前处理中请求数 |
-| `finserve_kv_cache_usage_percent` | Gauge | vLLM KV cache 使用率 0–100（/metrics 时从 vLLM 拉取） |
-
-## 3. 使用 Docker 启动 Prometheus + Grafana
-
-在**能访问 Web Proxy 的机器**上执行（Proxy 默认端口 8188）：
-
-```bash
-cd /path/to/FinServe-MLO-vLLM-/qwen3-vl-finance-web/monitoring
-```
-
-**若 Proxy 运行在本机**，先改 `prometheus.yml` 中的抓取地址：
-
-- Linux 本机：将 `host.docker.internal:8188` 改为 `127.0.0.1:8188`，并给 Prometheus 加 `network_mode: host`，或保持 `extra_hosts` 用 `host.docker.internal`（需 Docker 20.10+）。
-- 若 Prometheus 与 Proxy 同机且用 host 网络，可：
-  ```yaml
-  # prometheus.yml
-  scrape_configs:
-    - job_name: "finserve-web"
-      metrics_path: /metrics
-      static_configs:
-        - targets: ["127.0.0.1:8188"]
-  ```
-  然后 docker-compose 里 Prometheus 加：`network_mode: host`，并去掉 `ports: 9090`（host 下端口即本机）。
-
-为简单起见，下面用「Proxy 在本机、Docker 用 host 网络」的配置重写一份，这样用户本机跑 proxy 时无需改 host.docker.internal。
-</think>
-正在更新 `prometheus.yml` 和 docker-compose，使在 Linux 本机更易用：
-<｜tool▁calls▁begin｜><｜tool▁call▁begin｜>
-StrReplace
+  - job_name: "vllm-engine"
+    metrics_path: /metrics
+    scrape_interval: 10s
+    static_configs:
+      - targets: ["host.docker.internal:8000"]
+        labels:
+          service: "vllm"
